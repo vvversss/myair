@@ -185,14 +185,14 @@
                 <h3>ELF BAR BC5000</h3>
                 <p>Blue Razz Ice • 5000 тяг • 2%</p>
                 <div class="price">79 zł</div>
-                <a href="https://t.me/myairinpostprice" class="btn">Заказать</a>
+                <a href="javascript:void(0)" onclick="addToCart('ELF BAR BC5000')" class="btn">Заказать</a>
             </div>
 
             <div class="product">
                 <h3>VAPORESSO XROS 3</h3>
                 <p>POD • 1000 mAh • Оригинал</p>
                 <div class="price">129 zł</div>
-                <a href="https://t.me/myairinpostprice" class="btn">Заказать</a>
+                <a href="javascript:void(0)" onclick="addToCart('ELF BAR BC5000')" class="btn">Заказать</a>
             </div>
 
         </div>
@@ -217,5 +217,58 @@
         if (saved) showUser(JSON.parse(saved));
     </script>
 
+<!-- PROFILE MODAL -->
+<div class="profile-modal" id="profileModal" style="display:none;">
+    <div class="profile-box">
+        <h2>Профиль</h2>
+        <p id="profileName"></p>
+        <p id="profileId"></p>
+
+        <h3>История заказов</h3>
+        <ul id="orderHistory"></ul>
+
+        <h3>Корзина</h3>
+        <ul id="cartList"></ul>
+
+        <button class="btn" id="logoutBtn">Выйти</button>
+        <button class="btn btn-outline" id="closeProfile">Закрыть</button>
+    </div>
+</div>
+
+<style>
+.profile-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.profile-box {
+    background: #1a001f;
+    padding: 40px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    color: #fff;
+    box-shadow: 0 0 30px #ff2f92;
+}
+
+.profile-box h2, .profile-box h3 {
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.profile-box ul {
+    list-style: none;
+    margin-bottom: 20px;
+}
+
+.profile-box li {
+    margin-bottom: 5px;
+}
+</style>
 </body>
 </html>
