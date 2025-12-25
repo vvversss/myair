@@ -3,6 +3,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('enterBtn').addEventListener('click', () => {
         document.getElementById('ageCheck').style.display = 'none';
     });
+
+    // кнопки профиля
+    document.getElementById('logoutBtn').onclick = () => {
+        localStorage.removeItem('tg_user');
+        location.reload();
+    };
+    document.getElementById('closeProfile').onclick = () => {
+        document.getElementById('profileModal').style.display = 'none';
+    };
 });
 
 
@@ -45,15 +54,15 @@ function showProfile() {
 }
 
 // Кнопки закрытия и выхода
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('logoutBtn').onclick = () => {
-        localStorage.removeItem('tg_user');
-        location.reload();
-    };
-    document.getElementById('closeProfile').onclick = () => {
-        document.getElementById('profileModal').style.display = 'none';
-    };
-});
+// document.addEventListener('DOMContentLoaded', () => {
+//     document.getElementById('logoutBtn').onclick = () => {
+//         localStorage.removeItem('tg_user');
+//         location.reload();
+//     };
+//     document.getElementById('closeProfile').onclick = () => {
+//         document.getElementById('profileModal').style.display = 'none';
+//     };
+// });
 
 // ===== CART / ORDERS =====
 function addToCart(productName) {
