@@ -144,99 +144,13 @@
             color: var(--pink);
             margin: 15px 0;
         }
-    </style>
-</head>
 
-<body>
-
-    <!-- 18+ -->
-    <div class="age-check" id="ageCheck">
-        <div class="age-box">
-            <h1>18+</h1>
-            <p>Сайт предназначен только для совершеннолетних</p>
-            <button class="btn" onclick="enterSite()">Мне есть 18</button>
-        </div>
-    </div>
-
-    <!-- AUTH BUTTON -->
-    <div class="auth-btn" id="authBtn">
-        <script async src="https://telegram.org/js/telegram-widget.js?22" data-telegram-login="AirLogin_Bot"
-            data-size="large" data-userpic="true" data-radius="20" data-onauth="onTelegramAuth(user)">
-            </script>
-    </div>
-
-    <!-- HERO -->
-    <section class="hero">
-        <h2>MY AIR</h2>
-        <h1>Твой вкус. Твой пар.</h1>
-        <a href="#catalog" class="btn btn-outline">Каталог</a>
-    </section>
-
-    <!-- CATALOG -->
-    <section class="catalog" id="catalog">
-        <h2>Каталог</h2>
-        <div class="catalog-grid">
-
-            <div class="product">
-                <h3>ELF BAR BC5000</h3>
-                <p>Blue Razz Ice • 5000 тяг • 2%</p>
-                <div class="price">79 zł</div>
-                <a href="javascript:void(0)" onclick="addToCart('ELF BAR BC5000')" class="btn">Заказать</a>
-            </div>
-
-            <div class="product">
-                <h3>VAPORESSO XROS 3</h3>
-                <p>POD • 1000 mAh • Оригинал</p>
-                <div class="price">129 zł</div>
-                <a href="javascript:void(0)" onclick="addToCart('ELF BAR BC5000')" class="btn">Заказать</a>
-            </div>
-
-        </div>
-    </section>
-
-    <script>
-        function enterSite() {
-            document.getElementById('ageCheck').style.display = 'none';
-        }
-
-        function onTelegramAuth(user) {
-            localStorage.setItem('tg_user', JSON.stringify(user));
-            showUser(user);
-        }
-
-        function showUser(user) {
-            const btn = document.getElementById('authBtn');
-            btn.innerHTML = `<div class="btn">${user.first_name}</div>`;
-        }
-
-        const saved = localStorage.getItem('tg_user');
-        if (saved) showUser(JSON.parse(saved));
-    </script>
-
-    <!-- PROFILE MODAL -->
-    <div class="profile-modal" id="profileModal" style="display:none;">
-        <div class="profile-box">
-            <h2>Профиль</h2>
-            <p id="profileName"></p>
-            <p id="profileId"></p>
-
-            <h3>История заказов</h3>
-            <ul id="orderHistory"></ul>
-
-            <h3>Корзина</h3>
-            <ul id="cartList"></ul>
-
-            <button class="btn" id="logoutBtn">Выйти</button>
-            <button class="btn btn-outline" id="closeProfile">Закрыть</button>
-        </div>
-    </div>
-
-    <style>
+        /* ===== PROFILE ===== */
         .profile-modal {
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.85);
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
             z-index: 1000;
@@ -267,7 +181,76 @@
             margin-bottom: 5px;
         }
     </style>
-    <script src="script.js"></script>
+</head>
+
+<body>
+
+    <!-- 18+ -->
+    <div class="age-check" id="ageCheck">
+        <div class="age-box">
+            <h1>18+</h1>
+            <p>Сайт предназначен только для совершеннолетних</p>
+            <button class="btn" onclick="enterSite()">Мне есть 18</button>
+        </div>
+    </div>
+
+    <!-- AUTH BUTTON -->
+    <div class="auth-btn" id="authBtn">
+        <script async src="https://telegram.org/js/telegram-widget.js?22" data-telegram-login="AirLogin_Bot"
+            data-size="large" data-userpic="true" data-radius="20" data-onauth="onTelegramAuth(user)">
+        </script>
+    </div>
+
+    <!-- HERO -->
+    <section class="hero">
+        <h2>MY AIR</h2>
+        <h1>Твой вкус. Твой пар.</h1>
+        <a href="#catalog" class="btn btn-outline">Каталог</a>
+    </section>
+
+    <!-- CATALOG -->
+    <section class="catalog" id="catalog">
+        <h2>Каталог</h2>
+        <div class="catalog-grid">
+
+            <div class="product">
+                <h3>ELF BAR BC5000</h3>
+                <p>Blue Razz Ice • 5000 тяг • 2%</p>
+                <div class="price">79 zł</div>
+                <a href="javascript:void(0)" onclick="addToCart('ELF BAR BC5000')" class="btn">Заказать</a>
+            </div>
+
+            <div class="product">
+                <h3>VAPORESSO XROS 3</h3>
+                <p>POD • 1000 mAh • Оригинал</p>
+                <div class="price">129 zł</div>
+                <a href="javascript:void(0)" onclick="addToCart('VAPORESSO XROS 3')" class="btn">Заказать</a>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- PROFILE MODAL -->
+    <div class="profile-modal" id="profileModal">
+        <div class="profile-box">
+            <h2>Профиль</h2>
+            <p id="profileName"></p>
+            <p id="profileId"></p>
+
+            <h3>История заказов</h3>
+            <ul id="orderHistory"></ul>
+
+            <h3>Корзина</h3>
+            <ul id="cartList"></ul>
+
+            <button class="btn" id="logoutBtn">Выйти</button>
+            <button class="btn btn-outline" id="closeProfile">Закрыть</button>
+        </div>
+    </div>
+
+    <!-- Подключение JS -->
+    <script src="script.js" defer></script>
+
 </body>
 
 </html>

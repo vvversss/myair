@@ -1,52 +1,71 @@
-// показать профиль
-function showProfile(user) {
+// ===== 18+
+function enterSite() {
+    document.getElementById('ageCheck').style.display = 'none';
+}
+
+// ===== Telegram Auth =====
+function onTelegramAuth(user) {
+    localStorage.setItem('tg_user', JSON.stringify(user));
+    showUser(user);
+}
+
+function showUser(user) {
+    const btn = document.getElementById('authBtn');
+    btn.innerHTML = `<div class="btn" id="profileBtn">${user.first_name}</div>`;
+
+    // Открытие профиля по клику
+    document.getElementById('profileBtn').addEventListener('click', () => {
+        showProfile();
+    });
+}
+
+// Проверка сохранённого пользователя
+const saved = localStorage.getItem('tg_user');
+if (saved) showUser(JSON.parse(saved));
+
+// ===== PROFILE =====
+function showProfile() {
+    const user = JSON.parse(localStorage.getItem('tg_user'));
+    if (!user) return alert('Сначала авторизуйтесь');
+
     const modal = document.getElementById('profileModal');
     modal.style.display = 'flex';
 
     document.getElementById('profileName').textContent = `Имя: ${user.first_name}`;
     document.getElementById('profileId').textContent = `ID: ${user.id}`;
 
-    // загрузка истории заказов и корзины
     const orders = JSON.parse(localStorage.getItem('orders_' + user.id) || '[]');
     const cart = JSON.parse(localStorage.getItem('cart_' + user.id) || '[]');
 
-    const orderList = document.getElementById('orderHistory');
-    orderList.innerHTML = orders.length ? orders.map(o => `<li>${o}</li>`).join('') : '<li>Нет заказов</li>';
-
-    const cartList = document.getElementById('cartList');
-    cartList.innerHTML = cart.length ? cart.map(c => `<li>${c}</li>`).join('') : '<li>Корзина пуста</li>';
+    document.getElementById('orderHistory').innerHTML = orders.length ? orders.map(o => `<li>${o}</li>`).join('') : '<li>Нет заказов</li>';
+    document.getElementById('cartList').innerHTML = cart.length ? cart.map(c => `<li>${c}</li>`).join('') : '<li>Корзина пуста</li>';
 }
 
-// кнопки
-document.getElementById('logoutBtn').onclick = () => {
-    localStorage.removeItem('tg_user');
-    location.reload();
-};
+// Кнопки закрытия и выхода
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('logoutBtn').onclick = () => {
+        localStorage.removeItem('tg_user');
+        location.reload();
+    };
+    document.getElementById('closeProfile').onclick = () => {
+        document.getElementById('profileModal').style.display = 'none';
+    };
+});
 
-document.getElementById('closeProfile').onclick = () => {
-    document.getElementById('profileModal').style.display = 'none';
-};
-
-// заменяем кнопку с именем на открытие профиля
-function showUser(user) {
-    const btn = document.getElementById('authBtn');
-    btn.innerHTML = `<div class="btn" onclick="showProfile(${JSON.stringify(user)})">${user.first_name}</div>`;
-}
-
-
+// ===== CART / ORDERS =====
 function addToCart(productName) {
-    const saved = JSON.parse(localStorage.getItem('tg_user') || '{}');
-    if (!saved.id) return alert('Сначала авторизуйтесь');
+    const user = JSON.parse(localStorage.getItem('tg_user'));
+    if (!user) return alert('Сначала авторизуйтесь');
 
-    // добавить в корзину
-    const cart = JSON.parse(localStorage.getItem('cart_' + saved.id) || '[]');
+    // Добавление в корзину
+    const cart = JSON.parse(localStorage.getItem('cart_' + user.id) || '[]');
     cart.push(productName);
-    localStorage.setItem('cart_' + saved.id, JSON.stringify(cart));
+    localStorage.setItem('cart_' + user.id, JSON.stringify(cart));
 
-    // добавить в историю заказов
-    const orders = JSON.parse(localStorage.getItem('orders_' + saved.id) || '[]');
+    // Добавление в историю заказов
+    const orders = JSON.parse(localStorage.getItem('orders_' + user.id) || '[]');
     orders.push(productName);
-    localStorage.setItem('orders_' + saved.id, JSON.stringify(orders));
+    localStorage.setItem('orders_' + user.id, JSON.stringify(orders));
 
     alert(`${productName} добавлен в корзину и историю заказов`);
 }
