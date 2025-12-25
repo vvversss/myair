@@ -1,7 +1,11 @@
 // ===== 18+
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('enterBtn').addEventListener('click', () => {
-        document.getElementById('ageCheck').style.display = 'none';
+// Ждём полной загрузки страницы
+window.addEventListener('load', () => {
+    const ageBtn = document.getElementById('enterBtn');
+    const ageCheck = document.getElementById('ageCheck');
+
+    ageBtn.addEventListener('click', () => {
+        ageCheck.style.display = 'none';
     });
 
     // кнопки профиля
@@ -13,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('profileModal').style.display = 'none';
     };
 });
+
 
 
 // ===== Telegram Auth =====
