@@ -1,7 +1,10 @@
 // ===== 18+
-function enterSite() {
-    document.getElementById('ageCheck').style.display = 'none';
-}
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('enterBtn').addEventListener('click', () => {
+        document.getElementById('ageCheck').style.display = 'none';
+    });
+});
+
 
 // ===== Telegram Auth =====
 function onTelegramAuth(user) {
@@ -43,11 +46,6 @@ function showProfile() {
 
 // Кнопки закрытия и выхода
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('enterBtn').addEventListener('click', () => {
-        document.getElementById('ageCheck').style.display = 'none';
-    });
-
-    // кнопки профиля
     document.getElementById('logoutBtn').onclick = () => {
         localStorage.removeItem('tg_user');
         location.reload();
@@ -56,7 +54,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('profileModal').style.display = 'none';
     };
 });
-
 
 // ===== CART / ORDERS =====
 function addToCart(productName) {
