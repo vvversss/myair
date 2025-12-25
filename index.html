@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <title>My Air — Твой вкус. Твой пар.</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+    <script src="script.js"></script>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
@@ -160,13 +160,9 @@
 
     <!-- AUTH BUTTON -->
     <div class="auth-btn" id="authBtn">
-        <script async src="https://telegram.org/js/telegram-widget.js?22"
-            data-telegram-login="AirLogin_Bot"
-            data-size="large"
-            data-userpic="true"
-            data-radius="20"
-            data-onauth="onTelegramAuth(user)">
-        </script>
+        <script async src="https://telegram.org/js/telegram-widget.js?22" data-telegram-login="AirLogin_Bot"
+            data-size="large" data-userpic="true" data-radius="20" data-onauth="onTelegramAuth(user)">
+            </script>
     </div>
 
     <!-- HERO -->
@@ -217,58 +213,60 @@
         if (saved) showUser(JSON.parse(saved));
     </script>
 
-<!-- PROFILE MODAL -->
-<div class="profile-modal" id="profileModal" style="display:none;">
-    <div class="profile-box">
-        <h2>Профиль</h2>
-        <p id="profileName"></p>
-        <p id="profileId"></p>
+    <!-- PROFILE MODAL -->
+    <div class="profile-modal" id="profileModal" style="display:none;">
+        <div class="profile-box">
+            <h2>Профиль</h2>
+            <p id="profileName"></p>
+            <p id="profileId"></p>
 
-        <h3>История заказов</h3>
-        <ul id="orderHistory"></ul>
+            <h3>История заказов</h3>
+            <ul id="orderHistory"></ul>
 
-        <h3>Корзина</h3>
-        <ul id="cartList"></ul>
+            <h3>Корзина</h3>
+            <ul id="cartList"></ul>
 
-        <button class="btn" id="logoutBtn">Выйти</button>
-        <button class="btn btn-outline" id="closeProfile">Закрыть</button>
+            <button class="btn" id="logoutBtn">Выйти</button>
+            <button class="btn btn-outline" id="closeProfile">Закрыть</button>
+        </div>
     </div>
-</div>
 
-<style>
-.profile-modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
+    <style>
+        .profile-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
 
-.profile-box {
-    background: #1a001f;
-    padding: 40px;
-    border-radius: 20px;
-    width: 90%;
-    max-width: 500px;
-    color: #fff;
-    box-shadow: 0 0 30px #ff2f92;
-}
+        .profile-box {
+            background: #1a001f;
+            padding: 40px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            color: #fff;
+            box-shadow: 0 0 30px #ff2f92;
+        }
 
-.profile-box h2, .profile-box h3 {
-    margin-bottom: 10px;
-    text-align: center;
-}
+        .profile-box h2,
+        .profile-box h3 {
+            margin-bottom: 10px;
+            text-align: center;
+        }
 
-.profile-box ul {
-    list-style: none;
-    margin-bottom: 20px;
-}
+        .profile-box ul {
+            list-style: none;
+            margin-bottom: 20px;
+        }
 
-.profile-box li {
-    margin-bottom: 5px;
-}
-</style>
+        .profile-box li {
+            margin-bottom: 5px;
+        }
+    </style>
 </body>
+
 </html>
