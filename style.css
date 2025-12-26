@@ -247,7 +247,7 @@ body {
 
 /* CART */
 .cart-wrapper {
-    height: 100px;
+    height: 46px;
     display: flex;
     align-items: flex-end;
 }
