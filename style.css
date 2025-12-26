@@ -230,8 +230,9 @@ body {
 
 .top-right {
     display: flex;
-    align-items: flex-end; /* ВАЖНО */
-    gap: 30px;
+    flex-direction: column;   /* ⬅️ ВАЖНО */
+    align-items: flex-end;
+    gap: 30px;                /* расстояние между профилем и корзиной */
 }
 
 /* TELEGRAM */
