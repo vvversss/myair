@@ -18,155 +18,24 @@ body {
     overflow-x: hidden;
 }
 
-/* ===== 18+ ===== */
-.age-check {
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(circle at top, #1a001f, #000);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 999;
-}
-
-.age-box {
-    text-align: center;
-    padding: 40px;
-    border: 2px solid var(--pink);
-    box-shadow: 0 0 30px var(--pink);
-    background: rgba(0, 0, 0, 0.85);
-}
-
+/* Кнопки */
 .btn {
     padding: 12px 28px;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
     border-radius: 30px;
     color: #fff;
     background: var(--pink);
-    box-shadow: 0 0 15px var(--pink);
-    transition: 0.3s;
+    border: none;
+    cursor: pointer;
     text-decoration: none;
-    display: inline-block;
 }
-
-.btn:hover {
-    box-shadow: 0 0 30px var(--pink);
-    transform: scale(1.05);
-}
-
 .btn-outline {
     background: transparent;
     border: 2px solid var(--purple);
-    box-shadow: 0 0 15px var(--purple);
 }
 
-/* ===== AUTH ===== */
-.auth-btn {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 50;
-}
-
-/* ===== HERO ===== */
-.hero {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    background: radial-gradient(circle at bottom, #1a0025, #000);
-}
-
-.hero h2 {
-    font-size: 18px;
-    opacity: 0.8;
-    letter-spacing: 2px;
-}
-
-.hero h1 {
-    font-size: 56px;
-    margin: 10px 0;
-    text-shadow: 0 0 20px var(--purple);
-}
-
-/* ===== CATALOG ===== */
-.catalog {
-    padding: 100px 8%;
-    background: radial-gradient(circle at top, #120015, #000);
-}
-
-.catalog h2 {
-    text-align: center;
-    font-size: 42px;
-    margin-bottom: 60px;
-    text-shadow: 0 0 20px var(--purple);
-}
-
-.catalog-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 30px;
-}
-
-.product {
-    background: rgba(20, 0, 30, 0.8);
-    border-radius: 20px;
-    padding: 25px;
-    border: 1px solid rgba(255, 47, 146, 0.3);
-    box-shadow: 0 0 20px rgba(255, 47, 146, 0.15);
-    transition: 0.4s;
-}
-
-.product:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 0 35px rgba(255, 47, 146, 0.4);
-}
-
-.price {
-    font-size: 22px;
-    font-weight: 600;
-    color: var(--pink);
-    margin: 15px 0;
-}
-
-/* ===== PROFILE ===== */
-.profile-modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.85);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-
-.profile-box {
-    background: #1a001f;
-    padding: 40px;
-    border-radius: 20px;
-    width: 90%;
-    max-width: 500px;
-    color: #fff;
-    box-shadow: 0 0 30px #ff2f92;
-}
-
-.profile-box h2,
-.profile-box h3 {
-    margin-bottom: 10px;
-    text-align: center;
-}
-
-.profile-box ul {
-    list-style: none;
-    margin-bottom: 20px;
-}
-
-.profile-box li {
-    margin-bottom: 5px;
+/* Контейнер корзины */
+#cartItems {
+    margin: 20px 0;
 }
 
 .cart-btn {
