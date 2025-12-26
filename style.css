@@ -220,7 +220,7 @@ body {
     gap: 20px;
 }
 
-/* ===== HEADER FIX (TELEGRAM SAFE) ===== */
+/* HEADER */
 .top-bar {
     position: fixed;
     top: 16px;
@@ -230,29 +230,26 @@ body {
 
 .top-right {
     display: flex;
-    align-items: baseline; /* ВАЖНО */
+    align-items: flex-end; /* ВАЖНО */
     gap: 14px;
 }
 
-/* AUTH */
+/* TELEGRAM */
 .auth-wrapper {
-    height: 42px; /* ЖЁСТКО */
+    height: 46px; /* больше чем кнопка */
     display: flex;
-    align-items: center;
+    align-items: flex-end;
 }
 
-.auth-btn {
-    min-width: 170px;
-    height: 42px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.auth-btn iframe {
+    transform: translateY(2px); /* 🔑 убирает визуальное наложение */
 }
 
 /* CART */
 .cart-wrapper {
-    height: 42px;
+    height: 46px;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
 }
+
 
