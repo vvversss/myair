@@ -1,58 +1,61 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
-<meta charset="UTF-8">
-<title>Корзина</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Корзина</title>
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-<h1>Корзина</h1>
-<div id="cartItems"></div>
-<button id="placeOrderBtn">Оформить заказ</button>
+    <h1>Корзина</h1>
+    <div id="cartItems"></div>
+    <button id="placeOrderBtn" class="btn">Оформить заказ</button>
 
-<script src="script.js"></script>
-<script>
-function showCart() {
-    const cart = getCart();
-    const container = document.getElementById('cartItems');
-    container.innerHTML = '';
-    if (!cart.length) {
-        container.innerHTML = '<p>Корзина пуста</p>';
-        return;
-    }
-    cart.forEach((item, index) => {
-        container.innerHTML += `<div>${item} <button onclick="removeItem(${index})">Удалить</button></div>`;
-    });
-}
+    <script src="script.js"></script>
+    <script>
+        function showCart() {
+            const cart = getCart();
+            const container = document.getElementById('cartItems');
+            container.innerHTML = '';
+            if (!cart.length) {
+                container.innerHTML = '<p>Корзина пуста</p>';
+                return;
+            }
+            cart.forEach((item, index) => {
+                container.innerHTML += `<div>${item} <button class="btn btn-outline" onclick="removeItem(${index})">Удалить</button></div>`;
+            });
+        }
 
-function removeItem(index) {
-    const user = JSON.parse(localStorage.getItem('tg_user'));
-    const key = 'cart_' + user.id;
-    let cart = JSON.parse(localStorage.getItem(key) || '[]');
-    cart.splice(index, 1);
-    localStorage.setItem(key, JSON.stringify(cart));
-    showCart();
-}
+        function removeItem(index) {
+            const user = JSON.parse(localStorage.getItem('tg_user'));
+            const key = 'cart_' + user.id;
+            let cart = JSON.parse(localStorage.getItem(key) || '[]');
+            cart.splice(index, 1);
+            localStorage.setItem(key, JSON.stringify(cart));
+            showCart();
+        }
 
-document.getElementById('placeOrderBtn').onclick = function() {
-    const user = JSON.parse(localStorage.getItem('tg_user'));
-    const cart = getCart();
-    if (!cart.length) return alert('Корзина пуста');
-    
-    fetch('https://myair-server.onrender.com/order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user, cart })
-    })
-    .then(res => res.json())
-    .then(data => {
-        alert(data.message);
-        clearCart();
+        document.getElementById('placeOrderBtn').onclick = function () {
+            const user = JSON.parse(localStorage.getItem('tg_user'));
+            const cart = getCart();
+            if (!cart.length) return alert('Корзина пуста');
+
+            fetch('https://myair-server.onrender.com/order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user, cart })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    alert(data.message);
+                    clearCart();
+                    showCart();
+                });
+        };
+
         showCart();
-    });
-};
-
-showCart();
-</script>
+    </script>
 </body>
+
 </html>
