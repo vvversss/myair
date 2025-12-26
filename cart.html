@@ -49,7 +49,7 @@ document.getElementById('placeOrderBtn').onclick = function() {
     const cart = getCart();
     if (!cart.length) return alert('Корзина пуста');
 
-    fetch('https://myair-server.onrender.com/order', {
+    fetch('https://myair-zjra.onrender.com/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user, cart })
