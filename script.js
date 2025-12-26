@@ -1,4 +1,4 @@
-//BETA 1.4.1
+//BETA 1.4.2
 
 // ===================== 18+ =====================
 document.addEventListener('DOMContentLoaded', () => {
@@ -10,10 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (enterBtn && ageCheck) {
-        enterBtn.addEventListener('click', () => {
+        enterBtn.onclick = () => {
             localStorage.setItem('ageConfirmed', 'true');
             ageCheck.style.display = 'none';
-        });
+        };
     }
 });
 
@@ -25,16 +25,51 @@ function onTelegramAuth(user) {
 
 function showUser(user) {
     const btn = document.getElementById('authBtn');
-    if (btn) btn.innerHTML = `<div class="btn">${user.first_name}</div>`;
+    if (!btn) return;
+
+    btn.innerHTML = `<button class="btn">${user.first_name}</button>`;
+    btn.onclick = showProfile;
 }
 
 const savedUser = localStorage.getItem('tg_user');
 if (savedUser) showUser(JSON.parse(savedUser));
 
+// ===================== PROFILE =====================
+function showProfile() {
+    const user = JSON.parse(localStorage.getItem('tg_user'));
+    if (!user) return showToast('Сначала авторизуйтесь');
+
+    const modal = document.getElementById('profileModal');
+    modal.style.display = 'flex';
+
+    document.getElementById('profileName').textContent = `Имя: ${user.first_name}`;
+    document.getElementById('profileId').textContent = `ID: ${user.id}`;
+
+    const orders = JSON.parse(localStorage.getItem('orders_' + user.id) || '[]');
+    const list = document.getElementById('orderHistory');
+
+    list.innerHTML = orders.length
+        ? orders.map(o =>
+            `<li>${o.cart.map(p => p.name).join(', ')} — ${new Date(o.date).toLocaleString()}</li>`
+          ).join('')
+        : '<li>Заказов пока нет</li>';
+}
+
+// закрыть профиль
+document.getElementById('closeProfile').onclick = () => {
+    document.getElementById('profileModal').style.display = 'none';
+};
+
+// logout
+document.getElementById('logoutBtn').onclick = () => {
+    localStorage.removeItem('tg_user');
+    location.reload();
+};
+
 // ===================== CART =====================
 function addToCart(product) {
     const user = JSON.parse(localStorage.getItem('tg_user'));
-    if (!user) return showToast('Сначала авторизуйтесь через Telegram');
+    if (!user) return showToast('Сначала авторизуйтесь');
 
     const key = 'cart_' + user.id;
     const cart = JSON.parse(localStorage.getItem(key) || '[]');
@@ -51,12 +86,6 @@ function getCart() {
     return JSON.parse(localStorage.getItem('cart_' + user.id) || '[]');
 }
 
-function clearCart() {
-    const user = JSON.parse(localStorage.getItem('tg_user'));
-    if (!user) return;
-    localStorage.removeItem('cart_' + user.id);
-}
-
 // ===================== CATALOG =====================
 function renderCatalog(products) {
     const grid = document.querySelector('.catalog-grid');
@@ -64,39 +93,34 @@ function renderCatalog(products) {
 
     grid.innerHTML = '';
 
-    products.forEach(product => {
+    products.forEach(p => {
         const div = document.createElement('div');
         div.className = 'product';
-
         div.innerHTML = `
-            <h3>${product.name}</h3>
-            <p>${product.description}</p>
-            <div class="price">${product.price} zł</div>
+            <h3>${p.name}</h3>
+            <p>${p.description}</p>
+            <div class="price">${p.price} zł</div>
             <button class="btn">Заказать</button>
         `;
-
-        div.querySelector('button')
-            .addEventListener('click', () => addToCart(product));
-
+        div.querySelector('button').onclick = () => addToCart(p);
         grid.appendChild(div);
     });
 }
 
 fetch('https://myair-zjra.onrender.com/catalog')
-    .then(res => res.json())
-    .then(renderCatalog)
-    .catch(() => showToast('Ошибка загрузки каталога'));
+    .then(r => r.json())
+    .then(renderCatalog);
 
 // ===================== TOAST =====================
 function showToast(message, duration = 3000) {
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.textContent = message;
-    document.body.appendChild(toast);
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = message;
+    document.body.appendChild(t);
 
-    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => t.classList.add('show'), 10);
     setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 400);
+        t.classList.remove('show');
+        setTimeout(() => t.remove(), 400);
     }, duration);
 }

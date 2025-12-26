@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
-    <link rel="icon" type="image/png" sizes="32x32" href="logo2.png">
-    <meta charset="UTF-8" />
+    <link rel="icon" href="logo2.png">
+    <meta charset="UTF-8">
     <title>My Air — Твой вкус. Твой пар.</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -21,7 +20,7 @@
     </div>
 </div>
 
-<!-- AUTH -->
+<!-- AUTH / PROFILE BUTTON -->
 <div class="auth-btn" id="authBtn">
     <script async
         src="https://telegram.org/js/telegram-widget.js?22"
@@ -46,9 +45,24 @@
     <div class="catalog-grid"></div>
 </section>
 
-<!-- CART BUTTON -->
+<!-- CART -->
 <div class="cart-btn">
     <a href="cart.html" class="btn btn-outline">Корзина</a>
+</div>
+
+<!-- PROFILE MODAL -->
+<div class="profile-modal" id="profileModal">
+    <div class="profile-box">
+        <h2>Профиль</h2>
+        <p id="profileName"></p>
+        <p id="profileId"></p>
+
+        <h3>История заказов</h3>
+        <ul id="orderHistory"></ul>
+
+        <button class="btn" id="logoutBtn">Выйти</button>
+        <button class="btn btn-outline" id="closeProfile">Закрыть</button>
+    </div>
 </div>
 
 <script src="script.js" defer></script>
