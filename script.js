@@ -1,4 +1,5 @@
-//BETA 1.2
+//BETA 1.4.1
+
 // ===================== 18+ =====================
 document.addEventListener('DOMContentLoaded', () => {
     const ageCheck = document.getElementById('ageCheck');
@@ -30,60 +31,6 @@ function showUser(user) {
 const savedUser = localStorage.getItem('tg_user');
 if (savedUser) showUser(JSON.parse(savedUser));
 
-// ===================== PROFILE =====================
-function showProfile() {
-    const user = JSON.parse(localStorage.getItem('tg_user'));
-    if (!user) return showToast('Сначала авторизуйтесь');
-
-    const modal = document.getElementById('profileModal');
-    if (!modal) return;
-    modal.style.display = 'flex';
-
-    // Основная информация
-    const profileName = document.getElementById('profileName');
-    if (profileName) profileName.textContent = `Имя: ${user.first_name}`;
-
-    const profileId = document.getElementById('profileId');
-    if (profileId) profileId.textContent = `ID: ${user.id}`;
-
-    // История заказов
-    const ordersList = document.getElementById('orderHistory');
-    if (ordersList) {
-        const orders = JSON.parse(localStorage.getItem('orders_' + user.id) || '[]');
-        ordersList.innerHTML = orders.length
-            ? orders.map(o => `<li>${o.cart.map(p => p.name).join(', ')} — ${new Date(o.date).toLocaleString()}</li>`).join('')
-            : '<li>Нет заказов</li>';
-    }
-
-    // Корзина
-    const cartList = document.getElementById('cartList');
-    if (cartList) {
-        const cart = getCart();
-        cartList.innerHTML = cart.length
-            ? cart.map(p => `<li>${p.name} — ${p.price} zł</li>`).join('')
-            : '<li>Корзина пуста</li>';
-    }
-}
-
-// ===================== LOGOUT =====================
-const logoutBtn = document.getElementById('logoutBtn');
-if (logoutBtn) {
-    logoutBtn.onclick = () => {
-        localStorage.removeItem('tg_user');
-        location.reload();
-    };
-}
-
-// Закрыть профиль
-const closeProfile = document.getElementById('closeProfile');
-if (closeProfile) {
-    closeProfile.onclick = () => {
-        const modal = document.getElementById('profileModal');
-        if (modal) modal.style.display = 'none';
-    };
-}
-
-
 // ===================== CART =====================
 function addToCart(product) {
     const user = JSON.parse(localStorage.getItem('tg_user'));
@@ -92,13 +39,9 @@ function addToCart(product) {
     const key = 'cart_' + user.id;
     const cart = JSON.parse(localStorage.getItem(key) || '[]');
 
-    cart.push({
-        name: product.name,
-        price: product.price,
-        description: product.description
-    });
-
+    cart.push(product);
     localStorage.setItem(key, JSON.stringify(cart));
+
     showToast(`${product.name} добавлен в корзину`);
 }
 
@@ -116,26 +59,26 @@ function clearCart() {
 
 // ===================== CATALOG =====================
 function renderCatalog(products) {
-    const catalogGrid = document.querySelector('.catalog-grid');
-    if (!catalogGrid) return;
+    const grid = document.querySelector('.catalog-grid');
+    if (!grid) return;
 
-    catalogGrid.innerHTML = '';
+    grid.innerHTML = '';
 
     products.forEach(product => {
-        const card = document.createElement('div');
-        card.className = 'product';
+        const div = document.createElement('div');
+        div.className = 'product';
 
-        card.innerHTML = `
+        div.innerHTML = `
             <h3>${product.name}</h3>
             <p>${product.description}</p>
             <div class="price">${product.price} zł</div>
             <button class="btn">Заказать</button>
         `;
 
-        card.querySelector('button')
+        div.querySelector('button')
             .addEventListener('click', () => addToCart(product));
 
-        catalogGrid.appendChild(card);
+        grid.appendChild(div);
     });
 }
 
@@ -152,7 +95,6 @@ function showToast(message, duration = 3000) {
     document.body.appendChild(toast);
 
     setTimeout(() => toast.classList.add('show'), 10);
-
     setTimeout(() => {
         toast.classList.remove('show');
         setTimeout(() => toast.remove(), 400);
