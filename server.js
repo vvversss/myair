@@ -88,6 +88,19 @@ app.post('/order', (req, res) => {
     }
 });
 
+// Массив получателей
+const recipients = [...mods.moderators, ADMIN_ID];
+
+// Отправка уведомлений
+recipients.forEach(id => {
+    let text = `🛒 Новый заказ\n`;
+    text += `👤 @${user.username || user.first_name} (${user.id})\n\n`;
+    cart.forEach(item => {
+        text += `📦 ${item.name}\n📝 ${item.description}\n💰 ${item.price} zł\n\n`;
+    });
+    bot.sendMessage(id, text);
+});
+
 
 // ===== Бот: добавление товаров =====
 bot.onText(/\/add_product (.+)/, (msg, match) => {
