@@ -1,13 +1,14 @@
-// ===== 18+ =====
-window.addEventListener('load', () => {
-    const ageBtn = document.getElementById('enterBtn');
-    const ageCheck = document.getElementById('ageCheck');
-    if (ageBtn && ageCheck) {
-        ageBtn.addEventListener('click', () => {
-            ageCheck.style.display = 'none';
-        });
-    }
+function enterSite() {
+    localStorage.setItem('ageConfirmed', 'true');
+    document.getElementById('ageCheck').style.display = 'none';
+}
 
+// Проверка при загрузке страницы
+window.addEventListener('load', () => {
+    if (localStorage.getItem('ageConfirmed') === 'true') {
+        document.getElementById('ageCheck').style.display = 'none';
+    }
+    
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) logoutBtn.onclick = () => {
         localStorage.removeItem('tg_user');
