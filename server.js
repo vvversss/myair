@@ -39,27 +39,53 @@ app.get('/catalog', (req, res) => {
 
 // Оформить заказ
 app.post('/order', (req, res) => {
-    const { user, cart } = req.body;
-    if (!user || !cart || !cart.length) return res.status(400).json({ success: false, message: 'Invalid order' });
+    try {
+        const { user, cart } = req.body;
+        if (!user || !cart || !cart.length) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid order'
+            });
+        }
 
-    const order = { user, cart, date: new Date() };
-    orders.push(order);
-    fs.writeFileSync('orders.json', JSON.stringify(orders, null, 2));
+        const order = {
+            user,
+            cart,
+            date: new Date().toISOString()
+        };
 
-    // Отправка модераторам
-    MODERATORS.forEach(id => {
-    let text = `Новый заказ от @${user.username || user.first_name} (${user.id}):\n\n`;
-    order.cart.forEach(item => {
-        text += `Название: ${item.name}\nОписание: ${item.description}\nЦена: ${item.price}\n\n`;
-    });
-    bot.sendMessage(id, text);
+        orders.push(order);
+        fs.writeFileSync('orders.json', JSON.stringify(orders, null, 2));
+
+        // Отправка модераторам
+        MODERATORS.forEach(id => {
+            let text = `🛒 Новый заказ\n`;
+            text += `👤 @${user.username || user.first_name} (${user.id})\n\n`;
+
+            cart.forEach(item => {
+                text += `📦 ${item.name}\n`;
+                text += `📝 ${item.description}\n`;
+                text += `💰 ${item.price} zł\n\n`;
+            });
+
+            bot.sendMessage(id, text);
+        });
+
+        // ✅ ВОЗВРАЩАЕМ ОТВЕТ ФРОНТУ
+        res.json({
+            success: true,
+            message: 'Заказ отправлен модераторам'
+        });
+
+    } catch (err) {
+        console.error('ORDER ERROR:', err);
+        res.status(500).json({
+            success: false,
+            message: 'Server error'
+        });
+    }
 });
 
-
-
-   // При успешном заказе
-showToast('✅ Заказ отправлен модераторам!', 5000);
-});
 
 // ===== Бот для добавления товаров (только менеджеры) =====
 bot.onText(/\/add_product (.+)/, (msg, match) => {

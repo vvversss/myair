@@ -79,10 +79,10 @@ document.getElementById('placeOrderBtn').onclick = function() {
     })
     .then(res => res.json())
     .then(data => {
-        showToast(data.message || 'Заказ отправлен');
-        clearCart();
-        showCart();
-    })
+    showToast(data.message || 'Заказ отправлен');
+    clearCart();
+    showCart();
+})
     .catch(() => showToast('Ошибка при отправке заказа'));
 };
 
