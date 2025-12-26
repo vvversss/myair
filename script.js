@@ -28,13 +28,16 @@ function onTelegramAuth(user) {
 
 function showUser(user) {
     const btn = document.getElementById('authBtn');
-    btn.innerHTML = `<div class="btn" id="profileBtn">${user.first_name}</div>`;
+    if (btn) {
+        btn.innerHTML = `<div class="btn">${user.first_name}</div>`;
+    }
+}
+
 
     // Открытие профиля по клику
     document.getElementById('profileBtn').addEventListener('click', () => {
         showProfile();
     });
-}
 
 // Проверка сохранённого пользователя
 const saved = localStorage.getItem('tg_user');
