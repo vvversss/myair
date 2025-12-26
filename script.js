@@ -1,3 +1,4 @@
+//BETA 1.1
 // ===================== 18+ =====================
 document.addEventListener('DOMContentLoaded', () => {
     const ageCheck = document.getElementById('ageCheck');
