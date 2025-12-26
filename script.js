@@ -1,34 +1,43 @@
-// ===== 18+ =====
-function enterSite() {
-    localStorage.setItem('ageConfirmed', 'true');
+// ===================== 18+ =====================
+document.addEventListener('DOMContentLoaded', () => {
     const ageCheck = document.getElementById('ageCheck');
-    if (ageCheck) ageCheck.style.display = 'none';
-}
+    const enterBtn = document.getElementById('enterBtn');
 
-// Проверка при загрузке страницы
-window.addEventListener('load', () => {
     if (localStorage.getItem('ageConfirmed') === 'true') {
-        const ageCheck = document.getElementById('ageCheck');
         if (ageCheck) ageCheck.style.display = 'none';
     }
 
+    if (enterBtn && ageCheck) {
+        enterBtn.addEventListener('click', () => {
+            localStorage.setItem('ageConfirmed', 'true');
+            ageCheck.style.display = 'none';
+        });
+    }
+
+    // ===== Профиль =====
     const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) logoutBtn.onclick = () => {
-        localStorage.removeItem('tg_user');
-        location.reload();
-    };
+    if (logoutBtn) {
+        logoutBtn.onclick = () => {
+            localStorage.removeItem('tg_user');
+            location.reload();
+        };
+    }
 
     const closeProfile = document.getElementById('closeProfile');
-    if (closeProfile) closeProfile.onclick = () => {
-        const modal = document.getElementById('profileModal');
-        if (modal) modal.style.display = 'none';
-    };
+    if (closeProfile) {
+        closeProfile.onclick = () => {
+            const modal = document.getElementById('profileModal');
+            if (modal) modal.style.display = 'none';
+        };
+    }
 
     const profileBtn = document.getElementById('profileBtn');
-    if (profileBtn) profileBtn.addEventListener('click', showProfile);
+    if (profileBtn) {
+        profileBtn.addEventListener('click', showProfile);
+    }
 });
 
-// ===== Telegram Auth =====
+// ===================== Telegram Auth =====================
 function onTelegramAuth(user) {
     localStorage.setItem('tg_user', JSON.stringify(user));
     showUser(user);
@@ -39,11 +48,10 @@ function showUser(user) {
     if (btn) btn.innerHTML = `<div class="btn">${user.first_name}</div>`;
 }
 
-// Проверка сохранённого пользователя
-const saved = localStorage.getItem('tg_user');
-if (saved) showUser(JSON.parse(saved));
+const savedUser = localStorage.getItem('tg_user');
+if (savedUser) showUser(JSON.parse(savedUser));
 
-// ===== PROFILE =====
+// ===================== PROFILE =====================
 function showProfile() {
     const user = JSON.parse(localStorage.getItem('tg_user'));
     if (!user) return showToast('Сначала авторизуйтесь');
@@ -58,27 +66,29 @@ function showProfile() {
     const profileId = document.getElementById('profileId');
     if (profileId) profileId.textContent = `ID: ${user.id}`;
 
-    const ordersList = document.getElementById('orderHistory');
-    if (ordersList) {
-        const orders = JSON.parse(localStorage.getItem('orders_' + user.id) || '[]');
-        ordersList.innerHTML = orders.length ? orders.map(o => `<li>${o}</li>`).join('') : '<li>Нет заказов</li>';
-    }
-
     const cartList = document.getElementById('cartList');
     if (cartList) {
-        const cart = JSON.parse(localStorage.getItem('cart_' + user.id) || '[]');
-        cartList.innerHTML = cart.length ? cart.map(c => `<li>${c.name}</li>`).join('') : '<li>Корзина пуста</li>';
+        const cart = getCart();
+        cartList.innerHTML = cart.length
+            ? cart.map(p => `<li>${p.name}</li>`).join('')
+            : '<li>Корзина пуста</li>';
     }
 }
 
-// ===== CART / ORDERS =====
+// ===================== CART =====================
 function addToCart(product) {
     const user = JSON.parse(localStorage.getItem('tg_user'));
     if (!user) return showToast('Сначала авторизуйтесь через Telegram');
 
     const key = 'cart_' + user.id;
-    let cart = JSON.parse(localStorage.getItem(key) || '[]');
-    cart.push(product); // product = {name, price, description}
+    const cart = JSON.parse(localStorage.getItem(key) || '[]');
+
+    cart.push({
+        name: product.name,
+        price: product.price,
+        description: product.description
+    });
+
     localStorage.setItem(key, JSON.stringify(cart));
     showToast(`${product.name} добавлен в корзину`);
 }
@@ -95,33 +105,37 @@ function clearCart() {
     localStorage.removeItem('cart_' + user.id);
 }
 
-// ===== Catalog =====
-function renderCatalog(data) {
-    const catalogGrid = document.querySelector(".catalog-grid");
-    if (!catalogGrid) return;
+// ===================== CATALOG =====================
+function renderCatalog(products) {
+    const catalogGrid = document.querySelector('.catalog-grid');
+    if (!catalogGrid) return; // важно: чтобы НЕ ломало cart.html
 
-    catalogGrid.innerHTML = "";
-    data.forEach(product => {
-        const div = document.createElement('div');
-        div.className = 'product';
-        div.innerHTML = `
+    catalogGrid.innerHTML = '';
+
+    products.forEach(product => {
+        const card = document.createElement('div');
+        card.className = 'product';
+
+        card.innerHTML = `
             <h3>${product.name}</h3>
             <p>${product.description}</p>
             <div class="price">${product.price} zł</div>
             <button class="btn">Заказать</button>
         `;
-        const btn = div.querySelector('button');
-        btn.addEventListener('click', () => addToCart(product));
-        catalogGrid.appendChild(div);
+
+        card.querySelector('button')
+            .addEventListener('click', () => addToCart(product));
+
+        catalogGrid.appendChild(card);
     });
 }
 
-fetch("https://myair-zjra.onrender.com/catalog")
+fetch('https://myair-zjra.onrender.com/catalog')
     .then(res => res.json())
     .then(renderCatalog)
     .catch(() => showToast('Ошибка загрузки каталога'));
 
-// ===== Toast =====
+// ===================== TOAST =====================
 function showToast(message, duration = 3000) {
     const toast = document.createElement('div');
     toast.className = 'toast';
@@ -129,8 +143,9 @@ function showToast(message, duration = 3000) {
     document.body.appendChild(toast);
 
     setTimeout(() => toast.classList.add('show'), 10);
+
     setTimeout(() => {
         toast.classList.remove('show');
-        setTimeout(() => document.body.removeChild(toast), 400);
+        setTimeout(() => toast.remove(), 400);
     }, duration);
 }
