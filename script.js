@@ -1,15 +1,14 @@
-//BETA 1.1
+//BETA 1.2
 // ===================== 18+ =====================
 document.addEventListener('DOMContentLoaded', () => {
-    const ageCheck = document.getElementById('ageCheck');
-    const enterBtn = document.getElementById('enterBtn');
-
-    if (!ageCheck) return; // если страницы без 18+
-
-    if (localStorage.getItem('ageConfirmed') === 'true') {
+   const ageCheck = document.getElementById('ageCheck');
+const enterBtn = document.getElementById('enterBtn');
+if (ageCheck && enterBtn) {
+    enterBtn.addEventListener('click', () => {
+        localStorage.setItem('ageConfirmed', 'true');
         ageCheck.style.display = 'none';
-    }
-
+    });
+}
     if (enterBtn) {
         enterBtn.addEventListener('click', () => {
             localStorage.setItem('ageConfirmed', 'true');
