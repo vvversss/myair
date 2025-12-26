@@ -58,7 +58,7 @@ app.get('/catalog', (req, res) => {
     res.json(catalog);
 });
 
-// Оформить заказ
+// ===== Оформить заказ =====
 app.post('/order', (req, res) => {
     try {
         const { user, cart } = req.body;
@@ -70,9 +70,10 @@ app.post('/order', (req, res) => {
         orders.push(order);
         fs.writeFileSync('orders.json', JSON.stringify(orders, null, 2));
 
-        // Отправка модераторам
+        // Отправка уведомления всем модераторам
         mods.moderators.forEach(id => {
-            let text = `🛒 Новый заказ\n👤 @${user.username || user.first_name} (${user.id})\n\n`;
+            let text = `🛒 Новый заказ\n`;
+            text += `👤 @${user.username || user.first_name} (${user.id})\n\n`;
             cart.forEach(item => {
                 text += `📦 ${item.name}\n📝 ${item.description}\n💰 ${item.price} zł\n\n`;
             });
@@ -86,6 +87,7 @@ app.post('/order', (req, res) => {
         res.status(500).json({ success: false, message: 'Server error' });
     }
 });
+
 
 // ===== Бот: добавление товаров =====
 bot.onText(/\/add_product (.+)/, (msg, match) => {
