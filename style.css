@@ -1,3 +1,4 @@
+/* Пример: style.css */
 :root {
     --bg: #0b0b0b;
     --pink: #ff2f92;
@@ -5,17 +6,10 @@
     --text: #f5f5f5;
 }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
-}
-
 body {
     background: var(--bg);
     color: var(--text);
-    overflow-x: hidden;
+    font-family: 'Poppins', sans-serif;
 }
 
 /* Кнопки */
@@ -36,12 +30,4 @@ body {
 /* Контейнер корзины */
 #cartItems {
     margin: 20px 0;
-}
-
-.cart-btn {
-    position: fixed;
-    top: 20px;
-    right: 150px;
-    /* рядом с auth-btn */
-    z-index: 50;
 }
