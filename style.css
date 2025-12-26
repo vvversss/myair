@@ -192,3 +192,24 @@ body {
     margin-top: 20px;
     text-align: right;
 }
+
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--pink);
+    color: #fff;
+    padding: 15px 25px;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(255, 47, 146, 0.4);
+    opacity: 0;
+    transform: translateY(-20px);
+    pointer-events: none;
+    transition: 0.4s ease;
+    z-index: 10000;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}

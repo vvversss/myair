@@ -77,7 +77,7 @@ function addToCart(name) {
     let cart = JSON.parse(localStorage.getItem(key) || '[]');
     cart.push(name);
     localStorage.setItem(key, JSON.stringify(cart));
-    alert(`${name} добавлен в корзину`);
+    showToast(`${name} добавлен в корзину!`);
 }
 
 function getCart() {
@@ -108,3 +108,19 @@ fetch("https://myair-zjra.onrender.com/catalog")
           `;
       });
   });
+
+  function showToast(message, duration = 3000) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    // Запуск анимации
+    setTimeout(() => toast.classList.add('show'), 10);
+
+    // Скрыть и удалить через duration
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => document.body.removeChild(toast), 400);
+    }, duration);
+}
