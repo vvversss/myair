@@ -231,7 +231,7 @@ body {
 .top-right {
     display: flex;
     align-items: flex-end; /* ВАЖНО */
-    gap: 14px;
+    gap: 30px;
 }
 
 /* TELEGRAM */
