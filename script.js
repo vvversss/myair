@@ -22,6 +22,7 @@ window.addEventListener('load', () => {
 
     const profileBtn = document.getElementById('profileBtn');
     if (profileBtn) profileBtn.addEventListener('click', showProfile);
+
 });
 
 // ===== Telegram Auth =====
