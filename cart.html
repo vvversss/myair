@@ -79,14 +79,20 @@ document.getElementById('placeOrderBtn').onclick = function() {
     })
     .then(res => res.json())
     .then(data => {
-    showToast(data.message || 'Заказ отправлен');
-    clearCart();
-    showCart();
-})
+        showToast(data.message || 'Заказ отправлен');
+
+        // Добавляем заказ в историю пользователя
+        const ordersKey = 'orders_' + user.id;
+        const orders = JSON.parse(localStorage.getItem(ordersKey) || '[]');
+        orders.push({ cart: cart, date: new Date().toISOString() });
+        localStorage.setItem(ordersKey, JSON.stringify(orders));
+
+        clearCart();
+        showCart();
+    })
     .catch(() => showToast('Ошибка при отправке заказа'));
 };
 
-showCart();
 </script>
 
 </body>
