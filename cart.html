@@ -29,22 +29,33 @@ function showToast(message) {
 }
 
 function showCart() {
-    const cart = getCart();
+    const user = JSON.parse(localStorage.getItem('tg_user'));
+    if (!user) {
+        document.getElementById('cartItems').innerHTML = '<p>Сначала авторизуйтесь</p>';
+        return;
+    }
+
+    const cart = JSON.parse(localStorage.getItem('cart_' + user.id) || '[]');
     const container = document.getElementById('cartItems');
     container.innerHTML = '';
+
     if (!cart.length) {
         container.innerHTML = '<p>Корзина пуста</p>';
         return;
     }
+
     cart.forEach((item, index) => {
         container.innerHTML += `
             <div class="product cart-item">
-                <span>${item}</span>
+                <h3>${item.name}</h3>
+                <p>${item.description}</p>
+                <div class="price">${item.price}</div>
                 <button class="btn btn-outline" onclick="removeItem(${index})">Удалить</button>
             </div>
         `;
     });
 }
+
 
 function removeItem(index) {
     const user = JSON.parse(localStorage.getItem('tg_user'));

@@ -48,9 +48,13 @@ app.post('/order', (req, res) => {
 
     // Отправка модераторам
     MODERATORS.forEach(id => {
-    const username = user.username ? `@${user.username}` : `${user.first_name}`;
-    bot.sendMessage(id, `Новый заказ от ${username} (${user.id}):\n` + cart.join('\n'));
+    let text = `Новый заказ от @${user.username || user.first_name} (${user.id}):\n\n`;
+    order.cart.forEach(item => {
+        text += `Название: ${item.name}\nОписание: ${item.description}\nЦена: ${item.price}\n\n`;
+    });
+    bot.sendMessage(id, text);
 });
+
 
 
    // При успешном заказе

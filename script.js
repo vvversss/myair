@@ -69,16 +69,17 @@ function showProfile() {
 }
 
 // ===== CART / ORDERS =====
-function addToCart(name) {
+function addToCart(product) {
     const user = JSON.parse(localStorage.getItem('tg_user'));
-    if (!user) return alert('Сначала авторизуйтесь через Telegram');
+    if (!user) return showToast('Сначала авторизуйтесь через Telegram');
 
     const key = 'cart_' + user.id;
     let cart = JSON.parse(localStorage.getItem(key) || '[]');
-    cart.push(name);
+    cart.push(product); // product = {name, price, description}
     localStorage.setItem(key, JSON.stringify(cart));
-    showToast(`${name} добавлен в корзину!`);
+    showToast(`${product.name} добавлен в корзину`);
 }
+
 
 function getCart() {
     const user = JSON.parse(localStorage.getItem('tg_user'));
@@ -103,7 +104,7 @@ fetch("https://myair-zjra.onrender.com/catalog")
                   <h3>${product.name}</h3>
                   <p>${product.description}</p>
                   <div class="price">${product.price} zł</div>
-                  <button class="btn" onclick="addToCart('${product.name}')">Заказать</button>
+                  <a href="javascript:void(0)" class="btn" onclick='addToCart(${JSON.stringify(product)})'>Заказать</a>
               </div>
           `;
       });
