@@ -86,3 +86,29 @@ function addToCart(productName) {
 
     alert(`${productName} добавлен в корзину и историю заказов`);
 }
+
+// Добавление товара в корзину
+function addToCart(name) {
+    const user = JSON.parse(localStorage.getItem('tg_user'));
+    if (!user) return alert('Сначала авторизуйтесь через Telegram');
+
+    const key = 'cart_' + user.id;
+    let cart = JSON.parse(localStorage.getItem(key) || '[]');
+    cart.push(name);
+    localStorage.setItem(key, JSON.stringify(cart));
+    alert(`${name} добавлен в корзину`);
+}
+
+// Получение корзины
+function getCart() {
+    const user = JSON.parse(localStorage.getItem('tg_user'));
+    if (!user) return [];
+    return JSON.parse(localStorage.getItem('cart_' + user.id) || '[]');
+}
+
+// Очистка корзины
+function clearCart() {
+    const user = JSON.parse(localStorage.getItem('tg_user'));
+    if (!user) return;
+    localStorage.removeItem('cart_' + user.id);
+}

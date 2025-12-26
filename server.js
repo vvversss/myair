@@ -70,3 +70,19 @@ bot.onText(/\/add_product (.+)/, (msg, match) => {
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
+
+app.post('/order', (req, res) => {
+    const { user, cart } = req.body;
+    if (!user || !cart || !cart.length) return res.status(400).send('Invalid order');
+
+    const order = { user, cart, date: new Date() };
+    orders.push(order);
+    fs.writeFileSync('orders.json', JSON.stringify(orders, null, 2));
+
+    MODERATORS.forEach(id => {
+        bot.sendMessage(id, `Новый заказ от ${user.first_name} (${user.id}):\n` + cart.join('\n'));
+    });
+
+    res.json({ success: true, message: 'Заказ отправлен модераторам' });
+});
