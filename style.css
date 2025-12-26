@@ -214,3 +214,8 @@ body {
     opacity: 1;
     transform: translateY(0);
 }
+
+.cart-grid {
+    display: grid;
+    gap: 20px;
+}
