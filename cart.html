@@ -17,8 +17,17 @@
     <button id="placeOrderBtn" class="btn">Оформить заказ</button>
 </div>
 
+<div id="toast" class="toast"></div>
+
 <script src="script.js"></script>
 <script>
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
 function showCart() {
     const cart = getCart();
     const container = document.getElementById('cartItems');
@@ -39,17 +48,19 @@ function showCart() {
 
 function removeItem(index) {
     const user = JSON.parse(localStorage.getItem('tg_user'));
+    if (!user) return showToast('Сначала авторизуйтесь через Telegram');
     const key = 'cart_' + user.id;
     let cart = JSON.parse(localStorage.getItem(key) || '[]');
     cart.splice(index, 1);
     localStorage.setItem(key, JSON.stringify(cart));
     showCart();
+    showToast('Товар удалён из корзины');
 }
 
 document.getElementById('placeOrderBtn').onclick = function() {
     const user = JSON.parse(localStorage.getItem('tg_user'));
     const cart = getCart();
-    if (!cart.length) return alert('Корзина пуста');
+    if (!cart.length) return showToast('Корзина пуста');
 
     fetch('https://myair-zjra.onrender.com/order', {
         method: 'POST',
@@ -58,10 +69,11 @@ document.getElementById('placeOrderBtn').onclick = function() {
     })
     .then(res => res.json())
     .then(data => {
-        alert(data.message);
+        showToast(data.message || 'Заказ отправлен');
         clearCart();
         showCart();
-    });
+    })
+    .catch(() => showToast('Ошибка при отправке заказа'));
 };
 
 showCart();
