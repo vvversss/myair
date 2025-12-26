@@ -1,4 +1,4 @@
-//BETA 1.4.2
+//BETA 1.4.3
 
 // ===================== 18+ =====================
 document.addEventListener('DOMContentLoaded', () => {
@@ -27,9 +27,16 @@ function showUser(user) {
     const btn = document.getElementById('authBtn');
     if (!btn) return;
 
-    btn.innerHTML = `<button class="btn">${user.first_name}</button>`;
-    btn.onclick = showProfile;
+    btn.innerHTML = `
+        <button class="btn btn-outline profile-trigger">
+            👤 ${user.first_name}
+        </button>
+    `;
+
+    btn.querySelector('button')
+        .addEventListener('click', showProfile);
 }
+
 
 const savedUser = localStorage.getItem('tg_user');
 if (savedUser) showUser(JSON.parse(savedUser));

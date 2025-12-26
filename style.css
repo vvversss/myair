@@ -219,3 +219,28 @@ body {
     display: grid;
     gap: 20px;
 }
+
+/* ===== TOP BAR ===== */
+.top-bar {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.top-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Telegram button container */
+.auth-btn {
+    display: flex;
+    align-items: center;
+}
+
+/* Cart button */
+.cart-btn {
+    white-space: nowrap;
+}
