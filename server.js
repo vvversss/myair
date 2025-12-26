@@ -47,9 +47,11 @@ app.post('/order', (req, res) => {
     fs.writeFileSync('orders.json', JSON.stringify(orders, null, 2));
 
     // Отправка модераторам
-    MODERATORS.forEach(mod => {
-        bot.sendMessage(mod, `Новый заказ от ${user.first_name} (${user.id}):\n` + cart.join('\n'));
-    });
+    MODERATORS.forEach(id => {
+    const username = user.username ? `@${user.username}` : `${user.first_name}`;
+    bot.sendMessage(id, `Новый заказ от ${username} (${user.id}):\n` + cart.join('\n'));
+});
+
 
     res.json({ success: true, message: 'Заказ отправлен модераторам' });
 });
