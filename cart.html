@@ -21,22 +21,15 @@
 
 <script src="script.js"></script>
 <script>
-function showToast(message) {
-    const toast = document.getElementById('toast');
-    toast.textContent = message;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 3000);
-}
-
 function showCart() {
     const user = JSON.parse(localStorage.getItem('tg_user'));
+    const container = document.getElementById('cartItems');
     if (!user) {
-        document.getElementById('cartItems').innerHTML = '<p>Сначала авторизуйтесь</p>';
+        container.innerHTML = '<p>Сначала авторизуйтесь</p>';
         return;
     }
 
     const cart = JSON.parse(localStorage.getItem('cart_' + user.id) || '[]');
-    const container = document.getElementById('cartItems');
     container.innerHTML = '';
 
     if (!cart.length) {
@@ -45,21 +38,27 @@ function showCart() {
     }
 
     cart.forEach((item, index) => {
-        container.innerHTML += `
-            <div class="product cart-item">
-                <h3>${item.name}</h3>
-                <p>${item.description}</p>
-                <div class="price">${item.price}</div>
-                <button class="btn btn-outline" onclick="removeItem(${index})">Удалить</button>
-            </div>
+        const div = document.createElement('div');
+        div.className = 'product cart-item';
+        div.innerHTML = `
+            <h3>${item.name}</h3>
+            <p>${item.description}</p>
+            <div class="price">${item.price} zł</div>
         `;
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-outline';
+        btn.textContent = 'Удалить';
+        btn.addEventListener('click', () => {
+            removeItem(index);
+        });
+        div.appendChild(btn);
+        container.appendChild(div);
     });
 }
 
-
 function removeItem(index) {
     const user = JSON.parse(localStorage.getItem('tg_user'));
-    if (!user) return showToast('Сначала авторизуйтесь через Telegram');
+    if (!user) return showToast('Сначала авторизуйтесь');
     const key = 'cart_' + user.id;
     let cart = JSON.parse(localStorage.getItem(key) || '[]');
     cart.splice(index, 1);
