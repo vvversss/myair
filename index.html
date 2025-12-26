@@ -23,22 +23,29 @@
 <!-- AUTH / PROFILE BUTTON -->
 <header class="top-bar">
     <div class="top-right">
-        <div id="authBtn" class="auth-btn">
-            <script async
-                src="https://telegram.org/js/telegram-widget.js?22"
-                data-telegram-login="AirLogin_Bot"
-                data-size="medium"
-                data-userpic="false"
-                data-radius="12"
-                data-onauth="onTelegramAuth(user)">
-            </script>
+
+        <div class="auth-wrapper">
+            <div id="authBtn" class="auth-btn">
+                <script async
+                    src="https://telegram.org/js/telegram-widget.js?22"
+                    data-telegram-login="AirLogin_Bot"
+                    data-size="medium"
+                    data-userpic="false"
+                    data-radius="12"
+                    data-onauth="onTelegramAuth(user)">
+                </script>
+            </div>
         </div>
 
-        <a href="cart.html" class="btn btn-outline cart-btn">
-            🛒 Корзина
-        </a>
+        <div class="cart-wrapper">
+            <a href="cart.html" class="btn btn-outline">
+                🛒 Корзина
+            </a>
+        </div>
+
     </div>
 </header>
+
 
 
 <!-- HERO -->

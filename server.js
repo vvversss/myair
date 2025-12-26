@@ -1,4 +1,4 @@
-//BETA 1.4
+
 const express = require('express');
 const fs = require('fs');
 const bodyParser = require('body-parser');

@@ -220,27 +220,39 @@ body {
     gap: 20px;
 }
 
-/* ===== TOP BAR ===== */
+/* ===== HEADER FIX (TELEGRAM SAFE) ===== */
 .top-bar {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    top: 16px;
+    right: 16px;
     z-index: 1000;
 }
 
 .top-right {
     display: flex;
-    align-items: center;
-    gap: 12px;
+    align-items: baseline; /* ВАЖНО */
+    gap: 14px;
 }
 
-/* Telegram button container */
-.auth-btn {
+/* AUTH */
+.auth-wrapper {
+    height: 42px; /* ЖЁСТКО */
     display: flex;
     align-items: center;
 }
 
-/* Cart button */
-.cart-btn {
-    white-space: nowrap;
+.auth-btn {
+    min-width: 170px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
+
+/* CART */
+.cart-wrapper {
+    height: 42px;
+    display: flex;
+    align-items: center;
+}
+
