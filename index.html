@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+   <link rel="stylesheet" href="style.css">
 </head>
 
 <body data-page="home">
@@ -26,7 +26,7 @@
     <div class="auth-btn" id="authBtn">
         <script async src="https://telegram.org/js/telegram-widget.js?22" data-telegram-login="AirLogin_Bot"
             data-size="large" data-userpic="true" data-radius="20" data-onauth="onTelegramAuth(user)">
-        </script>
+            </script>
     </div>
 
     <!-- HERO -->
@@ -40,32 +40,36 @@
     <section class="catalog" id="catalog">
         <h2>Каталог</h2>
         <div class="catalog-grid"></div>
+
+        </div>
     </section>
 
-    <!-- PROFILE MODAL -->
-    <div class="profile-modal" id="profileModal">
-        <div class="profile-box">
-            <h2>Профиль</h2>
-            <p id="profileName"></p>
-            <p id="profileId"></p>
+  <!-- PROFILE MODAL -->
+<div class="profile-modal" id="profileModal">
+    <div class="profile-box">
+        <h2>Профиль</h2>
+        <p id="profileName"></p>
+        <p id="profileId"></p>
 
-            <h3>История заказов</h3>
-            <ul id="orderHistory"></ul>
+        <h3>История заказов</h3>
+        <ul id="orderHistory"></ul>
 
-            <h3>Корзина</h3>
-            <ul id="cartList"></ul>
+        <h3>Корзина</h3>
+        <ul id="cartList"></ul>
 
-            <button class="btn" id="logoutBtn">Выйти</button>
-            <button class="btn btn-outline" id="closeProfile">Закрыть</button>
-        </div>
+        <button class="btn" id="logoutBtn">Выйти</button>
+        <button class="btn btn-outline" id="closeProfile">Закрыть</button>
     </div>
+</div>
 
-    <!-- Кнопка открыть профиль -->
-    <div class="profile-btn" id="profileBtn">
-        <button class="btn btn-outline">Профиль</button>
-    </div>
+<!-- Кнопка открыть профиль -->
+<div class="profile-btn" id="profileBtn">
+    <button class="btn btn-outline">Профиль</button>
+</div>
+
 
     <!-- Подключение JS -->
     <script src="script.js" defer></script>
 </body>
+
 </html>
