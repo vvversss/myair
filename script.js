@@ -1,20 +1,20 @@
 //BETA 1.2
 // ===================== 18+ =====================
 document.addEventListener('DOMContentLoaded', () => {
-   const ageCheck = document.getElementById('ageCheck');
-const enterBtn = document.getElementById('enterBtn');
-if (ageCheck && enterBtn) {
-    enterBtn.addEventListener('click', () => {
-        localStorage.setItem('ageConfirmed', 'true');
+    const ageCheck = document.getElementById('ageCheck');
+    const enterBtn = document.getElementById('enterBtn');
+
+    if (localStorage.getItem('ageConfirmed') === 'true' && ageCheck) {
         ageCheck.style.display = 'none';
-    });
-}
-    if (enterBtn) {
+    }
+
+    if (enterBtn && ageCheck) {
         enterBtn.addEventListener('click', () => {
             localStorage.setItem('ageConfirmed', 'true');
             ageCheck.style.display = 'none';
         });
     }
+
     // ===== Профиль =====
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
@@ -107,16 +107,6 @@ function clearCart() {
 }
 
 // ===================== CATALOG =====================
-document.addEventListener('DOMContentLoaded', () => {
-    const page = document.body.dataset.page;
-    if (page !== 'home') return; // 🚫 НЕ ГРУЗИМ КАТАЛОГ В КОРЗИНЕ
-
-    fetch('https://myair-zjra.onrender.com/catalog')
-        .then(res => res.json())
-        .then(renderCatalog)
-        .catch(() => showToast('Ошибка загрузки каталога'));
-});
-
 function renderCatalog(products) {
     const catalogGrid = document.querySelector('.catalog-grid');
     if (!catalogGrid) return;
@@ -140,6 +130,11 @@ function renderCatalog(products) {
         catalogGrid.appendChild(card);
     });
 }
+
+fetch('https://myair-zjra.onrender.com/catalog')
+    .then(res => res.json())
+    .then(renderCatalog)
+    .catch(() => showToast('Ошибка загрузки каталога'));
 
 // ===================== TOAST =====================
 function showToast(message, duration = 3000) {
