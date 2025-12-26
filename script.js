@@ -3,17 +3,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const ageCheck = document.getElementById('ageCheck');
     const enterBtn = document.getElementById('enterBtn');
 
+    if (!ageCheck) return; // если страницы без 18+
+
     if (localStorage.getItem('ageConfirmed') === 'true') {
-        if (ageCheck) ageCheck.style.display = 'none';
+        ageCheck.style.display = 'none';
     }
 
-    if (enterBtn && ageCheck) {
+    if (enterBtn) {
         enterBtn.addEventListener('click', () => {
             localStorage.setItem('ageConfirmed', 'true');
             ageCheck.style.display = 'none';
         });
     }
-
     // ===== Профиль =====
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
