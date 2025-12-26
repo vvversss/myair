@@ -1,174 +1,150 @@
-const express = require('express');
-const fs = require('fs');
-const bodyParser = require('body-parser');
-const TelegramBot = require('node-telegram-bot-api');
-const cors = require('cors');
+//BETA 1.2
+// ===================== 18+ =====================
+document.addEventListener('DOMContentLoaded', () => {
+    const ageCheck = document.getElementById('ageCheck');
+    const enterBtn = document.getElementById('enterBtn');
 
-const app = express();
-app.use(cors());
-app.use(bodyParser.json());
+    if (localStorage.getItem('ageConfirmed') === 'true' && ageCheck) {
+        ageCheck.style.display = 'none';
+    }
 
-const PORT = process.env.PORT || 3000;
-const BOT_TOKEN = process.env.BOT_TOKEN;
-
-const bot = new TelegramBot(BOT_TOKEN, { polling: true });
-
-// ===== МОДЕРАТОРЫ =====
-const MODS_FILE = 'moderators.json';
-let mods = { admins: [], moderators: [] };
-
-try {
-    mods = JSON.parse(fs.readFileSync(MODS_FILE));
-} catch {
-    fs.writeFileSync(MODS_FILE, JSON.stringify(mods, null, 2));
-}
-
-function saveMods() {
-    fs.writeFileSync(MODS_FILE, JSON.stringify(mods, null, 2));
-}
-
-function isAdmin(id) {
-    return mods.admins.includes(id.toString());
-}
-
-function isModerator(id) {
-    return mods.moderators.includes(id.toString()) || isAdmin(id);
-}
-
-// ===== Каталог =====
-let catalog = [];
-try {
-    catalog = JSON.parse(fs.readFileSync('catalog.json'));
-} catch (e) {
-    catalog = [];
-}
-
-// ===== Заказы =====
-let orders = [];
-try {
-    orders = JSON.parse(fs.readFileSync('orders.json'));
-} catch (e) {
-    orders = [];
-}
-
-// ===== Маршруты =====
-
-// Получить каталог
-app.get('/catalog', (req, res) => {
-    res.json(catalog);
-});
-
-// ===== Оформить заказ =====
-app.post('/order', (req, res) => {
-    try {
-        const { user, cart } = req.body;
-        if (!user || !cart || !cart.length) {
-            return res.status(400).json({ success: false, message: 'Invalid order' });
-        }
-
-        const order = { user, cart, date: new Date().toISOString() };
-        orders.push(order);
-        fs.writeFileSync('orders.json', JSON.stringify(orders, null, 2));
-
-        // Отправка уведомления всем модераторам
-        mods.moderators.forEach(id => {
-            let text = `🛒 Новый заказ\n`;
-            text += `👤 @${user.username || user.first_name} (${user.id})\n\n`;
-            cart.forEach(item => {
-                text += `📦 ${item.name}\n📝 ${item.description}\n💰 ${item.price} zł\n\n`;
-            });
-            bot.sendMessage(id, text);
+    if (enterBtn && ageCheck) {
+        enterBtn.addEventListener('click', () => {
+            localStorage.setItem('ageConfirmed', 'true');
+            ageCheck.style.display = 'none';
         });
-
-        res.json({ success: true, message: 'Заказ отправлен модераторам' });
-
-    } catch (err) {
-        console.error('ORDER ERROR:', err);
-        res.status(500).json({ success: false, message: 'Server error' });
     }
+
+    // Открыть профиль
+    const profileBtn = document.getElementById('profileBtn');
+    if (profileBtn) profileBtn.addEventListener('click', showProfile);
 });
 
-// Массив получателей
-const recipients = [...mods.moderators, ADMIN_ID];
+// ===================== Telegram Auth =====================
+function onTelegramAuth(user) {
+    localStorage.setItem('tg_user', JSON.stringify(user));
+    showUser(user);
+}
 
-// Отправка уведомлений
-recipients.forEach(id => {
-    let text = `🛒 Новый заказ\n`;
-    text += `👤 @${user.username || user.first_name} (${user.id})\n\n`;
-    cart.forEach(item => {
-        text += `📦 ${item.name}\n📝 ${item.description}\n💰 ${item.price} zł\n\n`;
+function showUser(user) {
+    const btn = document.getElementById('authBtn');
+    if (btn) btn.innerHTML = `<div class="btn">${user.first_name}</div>`;
+}
+
+const savedUser = localStorage.getItem('tg_user');
+if (savedUser) showUser(JSON.parse(savedUser));
+
+// ===================== PROFILE =====================
+function showProfile() {
+    const user = JSON.parse(localStorage.getItem('tg_user'));
+    if (!user) return showToast('Сначала авторизуйтесь');
+
+    const modal = document.getElementById('profileModal');
+    if (!modal) return;
+    modal.style.display = 'flex';
+
+    // Основная информация
+    document.getElementById('profileName').textContent = `Имя: ${user.first_name}`;
+    document.getElementById('profileId').textContent = `ID: ${user.id}`;
+
+    // История заказов
+    const ordersKey = 'orders_' + user.id;
+    const orders = JSON.parse(localStorage.getItem(ordersKey) || '[]');
+    const ordersList = document.getElementById('orderHistory');
+    ordersList.innerHTML = orders.length
+        ? orders.map(o => `<li>${o.cart.map(p => p.name).join(', ')} — ${new Date(o.date).toLocaleString()}</li>`).join('')
+        : '<li>Нет заказов</li>';
+
+    // Корзина
+    const cart = getCart();
+    const cartList = document.getElementById('cartList');
+    cartList.innerHTML = cart.length
+        ? cart.map(p => `<li>${p.name} — ${p.price} zł</li>`).join('')
+        : '<li>Корзина пуста</li>';
+
+    // Выход
+    const logoutBtn = document.getElementById('logoutBtn');
+    logoutBtn.onclick = () => {
+        localStorage.removeItem('tg_user');
+        localStorage.removeItem('cart_' + user.id);
+        location.reload();
+    };
+
+    // Закрыть модалку
+    const closeProfile = document.getElementById('closeProfile');
+    closeProfile.onclick = () => modal.style.display = 'none';
+}
+
+// ===================== CART =====================
+function addToCart(product) {
+    const user = JSON.parse(localStorage.getItem('tg_user'));
+    if (!user) return showToast('Сначала авторизуйтесь через Telegram');
+
+    const key = 'cart_' + user.id;
+    const cart = JSON.parse(localStorage.getItem(key) || '[]');
+
+    cart.push({
+        name: product.name,
+        price: product.price,
+        description: product.description
     });
-    bot.sendMessage(id, text);
-});
 
+    localStorage.setItem(key, JSON.stringify(cart));
+    showToast(`${product.name} добавлен в корзину`);
+}
 
-// ===== Бот: добавление товаров =====
-bot.onText(/\/add_product (.+)/, (msg, match) => {
-    const chatId = msg.from.id.toString();
-    if (!isModerator(chatId)) return bot.sendMessage(chatId, '❌ Нет доступа');
+function getCart() {
+    const user = JSON.parse(localStorage.getItem('tg_user'));
+    if (!user) return [];
+    return JSON.parse(localStorage.getItem('cart_' + user.id) || '[]');
+}
 
-    const args = match[1].split('|'); // формат: Название|Цена|Описание
-    if (args.length < 3) return bot.sendMessage(chatId, 'Формат: Название|Цена|Описание');
+function clearCart() {
+    const user = JSON.parse(localStorage.getItem('tg_user'));
+    if (!user) return;
+    localStorage.removeItem('cart_' + user.id);
+}
 
-    const [name, price, description] = args;
-    catalog.push({ name, price, description });
-    fs.writeFileSync('catalog.json', JSON.stringify(catalog, null, 2));
-    bot.sendMessage(chatId, `✅ Товар "${name}" добавлен в каталог`);
-});
+// ===================== CATALOG =====================
+function renderCatalog(products) {
+    const catalogGrid = document.querySelector('.catalog-grid');
+    if (!catalogGrid) return;
 
-// ===== Бот: управление модерами =====
+    catalogGrid.innerHTML = '';
 
-// Добавить модератора
-bot.onText(/\/add_moderator (.+)/, async (msg, match) => {
-    const adminId = msg.from.id.toString();
-    if (!isAdmin(adminId)) return bot.sendMessage(adminId, '❌ Только админ');
+    products.forEach(product => {
+        const card = document.createElement('div');
+        card.className = 'product';
 
-    const username = match[1].replace('@', '');
-    try {
-        const user = await bot.getChat(username);
-        const id = user.id.toString();
+        card.innerHTML = `
+            <h3>${product.name}</h3>
+            <p>${product.description}</p>
+            <div class="price">${product.price} zł</div>
+            <button class="btn">Заказать</button>
+        `;
 
-        if (mods.moderators.includes(id)) return bot.sendMessage(adminId, '⚠️ Уже модератор');
+        card.querySelector('button')
+            .addEventListener('click', () => addToCart(product));
 
-        mods.moderators.push(id);
-        saveMods();
-        bot.sendMessage(adminId, `✅ @${username} добавлен в модераторы`);
-    } catch {
-        bot.sendMessage(adminId, '❌ Пользователь не найден');
-    }
-});
+        catalogGrid.appendChild(card);
+    });
+}
 
-// Удалить модератора
-bot.onText(/\/remove_moderator (.+)/, async (msg, match) => {
-    const adminId = msg.from.id.toString();
-    if (!isAdmin(adminId)) return bot.sendMessage(adminId, '❌ Только админ');
+fetch('https://myair-zjra.onrender.com/catalog')
+    .then(res => res.json())
+    .then(renderCatalog)
+    .catch(() => showToast('Ошибка загрузки каталога'));
 
-    const username = match[1].replace('@', '');
-    try {
-        const user = await bot.getChat(username);
-        const id = user.id.toString();
+// ===================== TOAST =====================
+function showToast(message, duration = 3000) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
 
-        mods.moderators = mods.moderators.filter(m => m !== id);
-        saveMods();
-        bot.sendMessage(adminId, `🗑 @${username} удалён из модераторов`);
-    } catch {
-        bot.sendMessage(adminId, '❌ Пользователь не найден');
-    }
-});
-
-// Список модераторов
-bot.onText(/\/moderators/, (msg) => {
-    const id = msg.from.id.toString();
-    if (!isAdmin(id)) return;
-
-    const list = mods.moderators.length
-        ? mods.moderators.map(m => `• ${m}`).join('\n')
-        : 'Модераторов нет';
-
-    bot.sendMessage(id, `👮 Модераторы:\n${list}`);
-});
-
-// ===== Запуск сервера =====
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+    }, duration);
+}
