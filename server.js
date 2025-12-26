@@ -10,7 +10,7 @@ app.use(bodyParser.json());
 
 const PORT = process.env.PORT || 3000;
 const BOT_TOKEN = process.env.BOT_TOKEN;
-const MODERATORS = (process.env.MODERATORS || '').split(',');
+const MODERATORS = (process.env.MODERATORS || '').split(','); // ID или username модеров
 
 const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 
@@ -18,7 +18,7 @@ const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 let catalog = [];
 try {
     catalog = JSON.parse(fs.readFileSync('catalog.json'));
-} catch(e) {
+} catch (e) {
     catalog = [];
 }
 
@@ -26,9 +26,11 @@ try {
 let orders = [];
 try {
     orders = JSON.parse(fs.readFileSync('orders.json'));
-} catch(e) {
+} catch (e) {
     orders = [];
 }
+
+// ===== Маршруты =====
 
 // Получить каталог
 app.get('/catalog', (req, res) => {
@@ -38,22 +40,21 @@ app.get('/catalog', (req, res) => {
 // Оформить заказ
 app.post('/order', (req, res) => {
     const { user, cart } = req.body;
-    if (!user || !cart || !cart.length) return res.status(400).send('Invalid order');
+    if (!user || !cart || !cart.length) return res.status(400).json({ success: false, message: 'Invalid order' });
 
     const order = { user, cart, date: new Date() };
     orders.push(order);
-
     fs.writeFileSync('orders.json', JSON.stringify(orders, null, 2));
 
-    // Отправка модераторам в Telegram
-    MODERATORS.forEach(id => {
-        bot.sendMessage(id, `Новый заказ от ${user.first_name} (${user.id}):\n` + cart.join('\n'));
+    // Отправка модераторам
+    MODERATORS.forEach(mod => {
+        bot.sendMessage(mod, `Новый заказ от ${user.first_name} (${user.id}):\n` + cart.join('\n'));
     });
 
     res.json({ success: true, message: 'Заказ отправлен модераторам' });
 });
 
-// Добавление товара через бот (только менеджеры)
+// ===== Бот для добавления товаров (только менеджеры) =====
 bot.onText(/\/add_product (.+)/, (msg, match) => {
     const chatId = msg.from.id.toString();
     if (!MODERATORS.includes(chatId)) return bot.sendMessage(chatId, 'Нет доступа');
@@ -67,22 +68,7 @@ bot.onText(/\/add_product (.+)/, (msg, match) => {
     bot.sendMessage(chatId, `Товар "${name}" добавлен в каталог`);
 });
 
+// ===== Запуск сервера =====
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
-});
-
-
-app.post('/order', (req, res) => {
-    const { user, cart } = req.body;
-    if (!user || !cart || !cart.length) return res.status(400).send('Invalid order');
-
-    const order = { user, cart, date: new Date() };
-    orders.push(order);
-    fs.writeFileSync('orders.json', JSON.stringify(orders, null, 2));
-
-    MODERATORS.forEach(id => {
-        bot.sendMessage(id, `Новый заказ от ${user.first_name} (${user.id}):\n` + cart.join('\n'));
-    });
-
-    res.json({ success: true, message: 'Заказ отправлен модераторам' });
 });

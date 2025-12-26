@@ -91,3 +91,20 @@ function clearCart() {
     if (!user) return;
     localStorage.removeItem('cart_' + user.id);
 }
+
+fetch("https://myair-zjra.onrender.com/catalog")
+  .then(res => res.json())
+  .then(data => {
+      const catalogGrid = document.querySelector(".catalog-grid");
+      catalogGrid.innerHTML = ""; // очищаем контейнер
+      data.forEach(product => {
+          catalogGrid.innerHTML += `
+              <div class="product">
+                  <h3>${product.name}</h3>
+                  <p>${product.description}</p>
+                  <div class="price">${product.price} zł</div>
+                  <button class="btn" onclick="addToCart('${product.name}')">Заказать</button>
+              </div>
+          `;
+      });
+  });
