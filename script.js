@@ -1,7 +1,8 @@
-//BETA 1.4.8
+// BETA 1.4.9 
 
-// ===================== 18+ =====================
 document.addEventListener('DOMContentLoaded', () => {
+
+    // ===================== 18+ =====================
     const ageCheck = document.getElementById('ageCheck');
     const enterBtn = document.getElementById('enterBtn');
 
@@ -13,6 +14,28 @@ document.addEventListener('DOMContentLoaded', () => {
         enterBtn.onclick = () => {
             localStorage.setItem('ageConfirmed', 'true');
             ageCheck.style.display = 'none';
+        };
+    }
+
+    // ===================== Telegram User =====================
+    const savedUser = localStorage.getItem('tg_user');
+    if (savedUser) showUser(JSON.parse(savedUser));
+
+    // ===================== PROFILE =====================
+    const closeProfileBtn = document.getElementById('closeProfile');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    if (closeProfileBtn) {
+        closeProfileBtn.onclick = () => {
+            const modal = document.getElementById('profileModal');
+            if (modal) modal.style.display = 'none';
+        };
+    }
+
+    if (logoutBtn) {
+        logoutBtn.onclick = () => {
+            localStorage.removeItem('tg_user');
+            location.reload();
         };
     }
 });
@@ -33,13 +56,8 @@ function showUser(user) {
         </button>
     `;
 
-    btn.querySelector('button')
-        .addEventListener('click', showProfile);
+    btn.querySelector('button').onclick = showProfile;
 }
-
-
-const savedUser = localStorage.getItem('tg_user');
-if (savedUser) showUser(JSON.parse(savedUser));
 
 // ===================== PROFILE =====================
 function showProfile() {
@@ -67,31 +85,6 @@ function showProfile() {
             : '<li>Заказов пока нет</li>';
     }
 }
-
-// закрыть профиль
-const closeProfile = document.getElementById('closeProfile');
-if (closeProfile) {
-    closeProfile.onclick = () => {
-        const closeProfile = document.getElementById('closeProfile');
-if (closeProfile) {
-    closeProfile.onclick = () => {
-        const modal = document.getElementById('profileModal');
-        if (modal) modal.style.display = 'none';
-    };
-}
-
-}}
-
-// logout
-const logoutBtn = document.getElementById('logoutBtn');
-if (logoutBtn) {
-    logoutBtn.onclick = () => {
-        localStorage.removeItem('tg_user');
-        location.reload();
-    };
-}
-
-
 
 // ===================== CART =====================
 function addToCart(product) {
@@ -136,7 +129,8 @@ function renderCatalog(products) {
 
 fetch('https://myair-zjra.onrender.com/catalog')
     .then(r => r.json())
-    .then(renderCatalog);
+    .then(renderCatalog)
+    .catch(err => console.error('Catalog error:', err));
 
 // ===================== TOAST =====================
 function showToast(message, duration = 3000) {
