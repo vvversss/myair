@@ -1,4 +1,4 @@
-//BETA 1.4.7
+//BETA 1.4.8
 
 // ===================== 18+ =====================
 document.addEventListener('DOMContentLoaded', () => {
@@ -47,31 +47,51 @@ function showProfile() {
     if (!user) return showToast('Сначала авторизуйтесь');
 
     const modal = document.getElementById('profileModal');
+    if (!modal) return;
+
     modal.style.display = 'flex';
 
-    document.getElementById('profileName').textContent = `Имя: ${user.first_name}`;
-    document.getElementById('profileId').textContent = `ID: ${user.id}`;
-
-    const orders = JSON.parse(localStorage.getItem('orders_' + user.id) || '[]');
+    const nameEl = document.getElementById('profileName');
+    const idEl = document.getElementById('profileId');
     const list = document.getElementById('orderHistory');
 
-    list.innerHTML = orders.length
-        ? orders.map(o =>
-            `<li>${o.cart.map(p => p.name).join(', ')} — ${new Date(o.date).toLocaleString()}</li>`
-          ).join('')
-        : '<li>Заказов пока нет</li>';
+    if (nameEl) nameEl.textContent = `Имя: ${user.first_name}`;
+    if (idEl) idEl.textContent = `ID: ${user.id}`;
+
+    if (list) {
+        const orders = JSON.parse(localStorage.getItem('orders_' + user.id) || '[]');
+        list.innerHTML = orders.length
+            ? orders.map(o =>
+                `<li>${o.cart.map(p => p.name).join(', ')} — ${new Date(o.date).toLocaleString()}</li>`
+              ).join('')
+            : '<li>Заказов пока нет</li>';
+    }
 }
 
 // закрыть профиль
-document.getElementById('closeProfile').onclick = () => {
-    document.getElementById('profileModal').style.display = 'none';
-};
+const closeProfile = document.getElementById('closeProfile');
+if (closeProfile) {
+    closeProfile.onclick = () => {
+        const closeProfile = document.getElementById('closeProfile');
+if (closeProfile) {
+    closeProfile.onclick = () => {
+        const modal = document.getElementById('profileModal');
+        if (modal) modal.style.display = 'none';
+    };
+}
+
+}}
 
 // logout
-document.getElementById('logoutBtn').onclick = () => {
-    localStorage.removeItem('tg_user');
-    location.reload();
-};
+const logoutBtn = document.getElementById('logoutBtn');
+if (logoutBtn) {
+    logoutBtn.onclick = () => {
+        localStorage.removeItem('tg_user');
+        location.reload();
+    };
+}
+
+
 
 // ===================== CART =====================
 function addToCart(product) {
