@@ -1,9 +1,8 @@
-
 const express = require('express');
-const fs = require('fs');
 const bodyParser = require('body-parser');
 const TelegramBot = require('node-telegram-bot-api');
 const cors = require('cors');
+const { Pool } = require('pg');
 
 const app = express();
 app.use(cors());
@@ -11,150 +10,163 @@ app.use(bodyParser.json());
 
 const PORT = process.env.PORT || 3000;
 const BOT_TOKEN = process.env.BOT_TOKEN;
+const ADMIN_ID = process.env.ADMIN_ID;
 
 const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 
-// ===== МОДЕРАТОРЫ =====
-const MODS_FILE = 'moderators.json';
-let mods = { admins: [], moderators: [] };
-
-try {
-    mods = JSON.parse(fs.readFileSync(MODS_FILE));
-} catch {
-    fs.writeFileSync(MODS_FILE, JSON.stringify(mods, null, 2));
-}
-
-function saveMods() {
-    fs.writeFileSync(MODS_FILE, JSON.stringify(mods, null, 2));
-}
-
-function isAdmin(id) {
-    return mods.admins.includes(id.toString());
-}
-
-function isModerator(id) {
-    return mods.moderators.includes(id.toString()) || isAdmin(id);
-}
-
-// ===== Каталог =====
-let catalog = [];
-try {
-    catalog = JSON.parse(fs.readFileSync('catalog.json'));
-} catch (e) {
-    catalog = [];
-}
-
-// ===== Заказы =====
-let orders = [];
-try {
-    orders = JSON.parse(fs.readFileSync('orders.json'));
-} catch (e) {
-    orders = [];
-}
-
-// ===== Маршруты =====
-
-// Получить каталог
-app.get('/catalog', (req, res) => {
-    res.json(catalog);
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
 });
 
-// Оформить заказ
-app.post('/order', (req, res) => {
+/* ================= INIT DB ================= */
+async function initDB() {
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS moderators (
+            id TEXT PRIMARY KEY,
+            role TEXT DEFAULT 'moderator'
+        );
+
+        CREATE TABLE IF NOT EXISTS products (
+            id SERIAL PRIMARY KEY,
+            name TEXT,
+            price NUMERIC,
+            description TEXT,
+            created_at TIMESTAMP DEFAULT NOW()
+        );
+
+        CREATE TABLE IF NOT EXISTS orders (
+            id SERIAL PRIMARY KEY,
+            user_id TEXT,
+            username TEXT,
+            created_at TIMESTAMP DEFAULT NOW()
+        );
+
+        CREATE TABLE IF NOT EXISTS order_items (
+            id SERIAL PRIMARY KEY,
+            order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
+            name TEXT,
+            description TEXT,
+            price NUMERIC
+        );
+    `);
+
+    if (ADMIN_ID) {
+        await pool.query(
+            `INSERT INTO moderators(id, role)
+             VALUES ($1,'admin')
+             ON CONFLICT (id) DO NOTHING`,
+            [ADMIN_ID]
+        );
+    }
+}
+initDB();
+
+/* ================= HELPERS ================= */
+async function isModerator(id) {
+    const r = await pool.query(
+        'SELECT 1 FROM moderators WHERE id=$1',
+        [id]
+    );
+    return r.rowCount > 0;
+}
+
+async function getAllStaff() {
+    const r = await pool.query('SELECT id FROM moderators');
+    return r.rows.map(r => r.id);
+}
+
+/* ================= API ================= */
+
+// каталог
+app.get('/catalog', async (_, res) => {
+    const r = await pool.query(
+        'SELECT name, price, description FROM products ORDER BY id DESC'
+    );
+    res.json(r.rows);
+});
+
+// заказ
+app.post('/order', async (req, res) => {
     try {
         const { user, cart } = req.body;
-        if (!user || !cart || !cart.length) {
-            return res.status(400).json({ success: false, message: 'Invalid order' });
+        if (!user || !cart?.length)
+            return res.status(400).json({ success: false });
+
+        const o = await pool.query(
+            `INSERT INTO orders(user_id, username)
+             VALUES($1,$2) RETURNING id`,
+            [user.id, user.username || user.first_name]
+        );
+
+        const orderId = o.rows[0].id;
+
+        for (const item of cart) {
+            await pool.query(
+                `INSERT INTO order_items(order_id,name,description,price)
+                 VALUES($1,$2,$3,$4)`,
+                [orderId, item.name, item.description, item.price]
+            );
         }
 
-        const order = { user, cart, date: new Date().toISOString() };
-        orders.push(order);
-        fs.writeFileSync('orders.json', JSON.stringify(orders, null, 2));
+        const staff = await getAllStaff();
+        let text = `🛒 Новый заказ\n👤 @${user.username || user.first_name}\n\n`;
 
-        // Отправка модераторам
-        mods.moderators.forEach(id => {
-            let text = `🛒 Новый заказ\n👤 @${user.username || user.first_name} (${user.id})\n\n`;
-            cart.forEach(item => {
-                text += `📦 ${item.name}\n📝 ${item.description}\n💰 ${item.price} zł\n\n`;
-            });
-            bot.sendMessage(id, text);
+        cart.forEach(i => {
+            text += `📦 ${i.name}\n📝 ${i.description}\n💰 ${i.price} zł\n\n`;
         });
 
-        res.json({ success: true, message: 'Заказ отправлен модераторам' });
+        staff.forEach(id => bot.sendMessage(id, text));
 
-    } catch (err) {
-        console.error('ORDER ERROR:', err);
-        res.status(500).json({ success: false, message: 'Server error' });
+        res.json({ success: true, message: 'Заказ отправлен' });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ success: false });
     }
 });
 
-// ===== Бот: добавление товаров =====
-bot.onText(/\/add_product (.+)/, (msg, match) => {
-    const chatId = msg.from.id.toString();
-    if (!isModerator(chatId)) return bot.sendMessage(chatId, '❌ Нет доступа');
+/* ================= BOT ================= */
 
-    const args = match[1].split('|'); // формат: Название|Цена|Описание
-    if (args.length < 3) return bot.sendMessage(chatId, 'Формат: Название|Цена|Описание');
+// добавить товар
+bot.onText(/\/add_product (.+)/, async (msg, match) => {
+    if (!(await isModerator(msg.from.id.toString())))
+        return bot.sendMessage(msg.chat.id, '❌ Нет доступа');
 
-    const [name, price, description] = args;
-    catalog.push({ name, price, description });
-    fs.writeFileSync('catalog.json', JSON.stringify(catalog, null, 2));
-    bot.sendMessage(chatId, `✅ Товар "${name}" добавлен в каталог`);
+    const [name, price, description] = match[1].split('|');
+    if (!name || !price || !description)
+        return bot.sendMessage(msg.chat.id, 'Формат: Название|Цена|Описание');
+
+    await pool.query(
+        `INSERT INTO products(name,price,description)
+         VALUES($1,$2,$3)`,
+        [name, price, description]
+    );
+
+    bot.sendMessage(msg.chat.id, `✅ ${name} добавлен`);
 });
 
-// ===== Бот: управление модерами =====
+// добавить модера
+bot.onText(/\/add_moderator (\d+)/, async (msg, match) => {
+    if (msg.from.id.toString() !== ADMIN_ID) return;
 
-// Добавить модератора
-bot.onText(/\/add_moderator (.+)/, async (msg, match) => {
-    const adminId = msg.from.id.toString();
-    if (!isAdmin(adminId)) return bot.sendMessage(adminId, '❌ Только админ');
+    await pool.query(
+        `INSERT INTO moderators(id) VALUES($1)
+         ON CONFLICT DO NOTHING`,
+        [match[1]]
+    );
 
-    const username = match[1].replace('@', '');
-    try {
-        const user = await bot.getChat(username);
-        const id = user.id.toString();
-
-        if (mods.moderators.includes(id)) return bot.sendMessage(adminId, '⚠️ Уже модератор');
-
-        mods.moderators.push(id);
-        saveMods();
-        bot.sendMessage(adminId, `✅ @${username} добавлен в модераторы`);
-    } catch {
-        bot.sendMessage(adminId, '❌ Пользователь не найден');
-    }
+    bot.sendMessage(msg.chat.id, '✅ Модератор добавлен');
 });
 
-// Удалить модератора
-bot.onText(/\/remove_moderator (.+)/, async (msg, match) => {
-    const adminId = msg.from.id.toString();
-    if (!isAdmin(adminId)) return bot.sendMessage(adminId, '❌ Только админ');
+// список
+bot.onText(/\/moderators/, async (msg) => {
+    if (msg.from.id.toString() !== ADMIN_ID) return;
 
-    const username = match[1].replace('@', '');
-    try {
-        const user = await bot.getChat(username);
-        const id = user.id.toString();
-
-        mods.moderators = mods.moderators.filter(m => m !== id);
-        saveMods();
-        bot.sendMessage(adminId, `🗑 @${username} удалён из модераторов`);
-    } catch {
-        bot.sendMessage(adminId, '❌ Пользователь не найден');
-    }
+    const r = await pool.query('SELECT id, role FROM moderators');
+    const list = r.rows.map(x => `• ${x.id} (${x.role})`).join('\n');
+    bot.sendMessage(msg.chat.id, list || 'Пусто');
 });
 
-// Список модераторов
-bot.onText(/\/moderators/, (msg) => {
-    const id = msg.from.id.toString();
-    if (!isAdmin(id)) return;
-
-    const list = mods.moderators.length
-        ? mods.moderators.map(m => `• ${m}`).join('\n')
-        : 'Модераторов нет';
-
-    bot.sendMessage(id, `👮 Модераторы:\n${list}`);
-});
-
-// ===== Запуск сервера =====
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+app.listen(PORT, () =>
+    console.log('🚀 Server running')
+);
