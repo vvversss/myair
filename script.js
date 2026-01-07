@@ -1,4 +1,4 @@
-//BETA 1.4.6
+//BETA 1.4.7
 
 // ===================== 18+ =====================
 document.addEventListener('DOMContentLoaded', () => {
