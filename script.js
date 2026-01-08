@@ -1,10 +1,9 @@
-// BETA 1.5.1 — FIXED & STABLE
+// BETA 1.5.2 — CLEAN & STABLE
 
 document.addEventListener('DOMContentLoaded', () => {
-
     const page = document.body.dataset.page || 'index';
 
-    /* ===================== 18+ (ТОЛЬКО ГЛАВНАЯ) ===================== */
+    /* ===================== 18+ ===================== */
     if (page === 'index') {
         const ageCheck = document.getElementById('ageCheck');
         const enterBtn = document.getElementById('enterBtn');
@@ -43,16 +42,24 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    /* ===================== CATALOG (ТОЛЬКО ГЛАВНАЯ) ===================== */
+    /* ===================== INDEX ===================== */
     if (page === 'index') {
         fetch('https://myair-zjra.onrender.com/catalog')
             .then(r => r.json())
             .then(renderCatalog)
-            .catch(err => console.error('Catalog error:', err));
+            .catch(err => console.error(err));
+    }
+
+    /* ===================== CART ===================== */
+    if (page === 'cart') {
+        showCart();
+
+        const placeBtn = document.getElementById('placeOrderBtn');
+        if (placeBtn) placeBtn.onclick = placeOrder;
     }
 });
 
-/* ===================== TELEGRAM AUTH ===================== */
+/* ===================== TELEGRAM ===================== */
 function onTelegramAuth(user) {
     localStorage.setItem('tg_user', JSON.stringify(user));
     showUser(user);
@@ -67,7 +74,6 @@ function showUser(user) {
             👤 ${user.first_name}
         </button>
     `;
-
     btn.querySelector('button').onclick = showProfile;
 }
 
@@ -81,21 +87,17 @@ function showProfile() {
 
     modal.style.display = 'flex';
 
-    const nameEl = document.getElementById('profileName');
-    const idEl = document.getElementById('profileId');
+    document.getElementById('profileName').textContent = `Имя: ${user.first_name}`;
+    document.getElementById('profileId').textContent = `ID: ${user.id}`;
+
     const list = document.getElementById('orderHistory');
+    const orders = JSON.parse(localStorage.getItem('orders_' + user.id) || '[]');
 
-    if (nameEl) nameEl.textContent = `Имя: ${user.first_name}`;
-    if (idEl) idEl.textContent = `ID: ${user.id}`;
-
-    if (list) {
-        const orders = JSON.parse(localStorage.getItem('orders_' + user.id) || '[]');
-        list.innerHTML = orders.length
-            ? orders.map(o =>
-                `<li>${o.cart.map(p => p.name).join(', ')} — ${new Date(o.date).toLocaleString()}</li>`
-              ).join('')
-            : '<li>Заказов пока нет</li>';
-    }
+    list.innerHTML = orders.length
+        ? orders.map(o =>
+            `<li>${o.cart.map(p => p.name).join(', ')} — ${new Date(o.date).toLocaleString()}</li>`
+          ).join('')
+        : '<li>Заказов пока нет</li>';
 }
 
 /* ===================== CART ===================== */
@@ -112,16 +114,86 @@ function addToCart(product) {
     showToast(`${product.name} добавлен в корзину`);
 }
 
-function getCart() {
+function showCart() {
+    const container = document.getElementById('cartItems');
     const user = JSON.parse(localStorage.getItem('tg_user'));
-    if (!user) return [];
-    return JSON.parse(localStorage.getItem('cart_' + user.id) || '[]');
+
+    if (!container) return;
+
+    if (!user) {
+        container.innerHTML = '<p>Сначала авторизуйтесь</p>';
+        return;
+    }
+
+    const cart = JSON.parse(localStorage.getItem('cart_' + user.id) || '[]');
+    container.innerHTML = '';
+
+    if (!cart.length) {
+        container.innerHTML = '<p>Корзина пуста</p>';
+        return;
+    }
+
+    cart.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'product cart-item';
+        div.innerHTML = `
+            <div>
+                <h3>${item.name}</h3>
+                <p>${item.description}</p>
+                <div class="price">${item.price} zł</div>
+            </div>
+        `;
+
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-outline';
+        btn.textContent = 'Удалить';
+        btn.onclick = () => removeItem(index);
+
+        div.appendChild(btn);
+        container.appendChild(div);
+    });
+}
+
+function removeItem(index) {
+    const user = JSON.parse(localStorage.getItem('tg_user'));
+    const key = 'cart_' + user.id;
+    const cart = JSON.parse(localStorage.getItem(key) || '[]');
+
+    cart.splice(index, 1);
+    localStorage.setItem(key, JSON.stringify(cart));
+
+    showCart();
+    showToast('Товар удалён');
 }
 
 function clearCart() {
     const user = JSON.parse(localStorage.getItem('tg_user'));
-    if (!user) return;
     localStorage.removeItem('cart_' + user.id);
+}
+
+/* ===================== ORDER ===================== */
+function placeOrder() {
+    const user = JSON.parse(localStorage.getItem('tg_user'));
+    const cart = JSON.parse(localStorage.getItem('cart_' + user.id) || '[]');
+
+    if (!cart.length) return showToast('Корзина пуста');
+
+    fetch('https://myair-zjra.onrender.com/order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user, cart })
+    })
+    .then(r => r.json())
+    .then(() => {
+        const key = 'orders_' + user.id;
+        const orders = JSON.parse(localStorage.getItem(key) || '[]');
+        orders.push({ cart, date: new Date().toISOString() });
+        localStorage.setItem(key, JSON.stringify(orders));
+
+        clearCart();
+        showCart();
+        showToast('Заказ отправлен');
+    });
 }
 
 /* ===================== CATALOG ===================== */
@@ -130,7 +202,6 @@ function renderCatalog(products) {
     if (!grid) return;
 
     grid.innerHTML = '';
-
     products.forEach(p => {
         const div = document.createElement('div');
         div.className = 'product';
@@ -140,22 +211,18 @@ function renderCatalog(products) {
             <div class="price">${p.price} zł</div>
             <button class="btn">Заказать</button>
         `;
-
         div.querySelector('button').onclick = () => addToCart(p);
         grid.appendChild(div);
     });
 }
 
 /* ===================== TOAST ===================== */
-function showToast(message, duration = 3000) {
+function showToast(message) {
     const t = document.createElement('div');
     t.className = 'toast';
     t.textContent = message;
     document.body.appendChild(t);
 
     setTimeout(() => t.classList.add('show'), 10);
-    setTimeout(() => {
-        t.classList.remove('show');
-        setTimeout(() => t.remove(), 400);
-    }, duration);
+    setTimeout(() => t.remove(), 3000);
 }

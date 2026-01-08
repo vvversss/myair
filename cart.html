@@ -1,18 +1,8 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta charset="UTF-8">
-<title>Корзина</title>
-<link rel="stylesheet" href="style.css">
-</head>
-
 <body data-page="cart">
 
 <h1>Корзина</h1>
 
-<a href="index.html" class="btn btn-outline" style="margin-bottom:20px; display:inline-block;">
-    ← На главную
-</a>
+<a href="index.html" class="btn btn-outline">← На главную</a>
 
 <div id="cartItems" class="cart-grid"></div>
 
@@ -20,110 +10,5 @@
     <button id="placeOrderBtn" class="btn">Оформить заказ</button>
 </div>
 
-<script src="script.js"></script>
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    showCart();
-
-    const placeBtn = document.getElementById('placeOrderBtn');
-    if (placeBtn) {
-        placeBtn.onclick = placeOrder;
-    }
-});
-
-// ===================== CART =====================
-function showCart() {
-    const container = document.getElementById('cartItems');
-    const user = JSON.parse(localStorage.getItem('tg_user'));
-
-    if (!container) return;
-
-    if (!user) {
-        container.innerHTML = '<p>Сначала авторизуйтесь</p>';
-        return;
-    }
-
-    const cart = JSON.parse(localStorage.getItem('cart_' + user.id) || '[]');
-    container.innerHTML = '';
-
-    if (!cart.length) {
-        container.innerHTML = '<p>Корзина пуста</p>';
-        return;
-    }
-
-    cart.forEach((item, index) => {
-        const div = document.createElement('div');
-        div.className = 'product cart-item';
-
-        div.innerHTML = `
-            <div>
-                <h3>${item.name}</h3>
-                <p>${item.description}</p>
-                <div class="price">${item.price} zł</div>
-            </div>
-        `;
-
-        const btn = document.createElement('button');
-        btn.className = 'btn btn-outline';
-        btn.textContent = 'Удалить';
-        btn.onclick = () => removeItem(index);
-
-        div.appendChild(btn);
-        container.appendChild(div);
-    });
-}
-
-function removeItem(index) {
-    const user = JSON.parse(localStorage.getItem('tg_user'));
-    if (!user) return showToast('Сначала авторизуйтесь');
-
-    const key = 'cart_' + user.id;
-    const cart = JSON.parse(localStorage.getItem(key) || '[]');
-
-    cart.splice(index, 1);
-    localStorage.setItem(key, JSON.stringify(cart));
-
-    showCart();
-    showToast('Товар удалён из корзины');
-}
-
-function clearCart() {
-    const user = JSON.parse(localStorage.getItem('tg_user'));
-    if (!user) return;
-
-    localStorage.removeItem('cart_' + user.id);
-}
-
-// ===================== ORDER =====================
-function placeOrder() {
-    const user = JSON.parse(localStorage.getItem('tg_user'));
-    if (!user) return showToast('Сначала авторизуйтесь');
-
-    const cart = JSON.parse(localStorage.getItem('cart_' + user.id) || '[]');
-    if (!cart.length) return showToast('Корзина пуста');
-
-    fetch('https://myair-zjra.onrender.com/order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user, cart })
-    })
-    .then(res => res.json())
-    .then(data => {
-        showToast(data.message || 'Заказ отправлен');
-
-        // история заказов
-        const ordersKey = 'orders_' + user.id;
-        const orders = JSON.parse(localStorage.getItem(ordersKey) || '[]');
-        orders.push({ cart, date: new Date().toISOString() });
-        localStorage.setItem(ordersKey, JSON.stringify(orders));
-
-        clearCart();
-        showCart();
-    })
-    .catch(() => showToast('Ошибка при отправке заказа'));
-}
-</script>
-
+<script src="script.js" defer></script>
 </body>
-</html>
