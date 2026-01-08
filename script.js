@@ -1,4 +1,4 @@
-// BETA 1.5.0 — FIXED & STABLE
+// BETA 1.5.1 — FIXED & STABLE
 
 document.addEventListener('DOMContentLoaded', () => {
 
