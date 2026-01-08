@@ -1,27 +1,31 @@
-// BETA 1.4.9 
+// BETA 1.5.0 — FIXED & STABLE
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // ===================== 18+ =====================
-    const ageCheck = document.getElementById('ageCheck');
-    const enterBtn = document.getElementById('enterBtn');
+    const page = document.body.dataset.page || 'index';
 
-    if (localStorage.getItem('ageConfirmed') === 'true' && ageCheck) {
-        ageCheck.style.display = 'none';
-    }
+    /* ===================== 18+ (ТОЛЬКО ГЛАВНАЯ) ===================== */
+    if (page === 'index') {
+        const ageCheck = document.getElementById('ageCheck');
+        const enterBtn = document.getElementById('enterBtn');
 
-    if (enterBtn && ageCheck) {
-        enterBtn.onclick = () => {
-            localStorage.setItem('ageConfirmed', 'true');
+        if (localStorage.getItem('ageConfirmed') === 'true' && ageCheck) {
             ageCheck.style.display = 'none';
-        };
+        }
+
+        if (enterBtn && ageCheck) {
+            enterBtn.onclick = () => {
+                localStorage.setItem('ageConfirmed', 'true');
+                ageCheck.style.display = 'none';
+            };
+        }
     }
 
-    // ===================== Telegram User =====================
+    /* ===================== USER ===================== */
     const savedUser = localStorage.getItem('tg_user');
     if (savedUser) showUser(JSON.parse(savedUser));
 
-    // ===================== PROFILE =====================
+    /* ===================== PROFILE ===================== */
     const closeProfileBtn = document.getElementById('closeProfile');
     const logoutBtn = document.getElementById('logoutBtn');
 
@@ -38,9 +42,17 @@ document.addEventListener('DOMContentLoaded', () => {
             location.reload();
         };
     }
+
+    /* ===================== CATALOG (ТОЛЬКО ГЛАВНАЯ) ===================== */
+    if (page === 'index') {
+        fetch('https://myair-zjra.onrender.com/catalog')
+            .then(r => r.json())
+            .then(renderCatalog)
+            .catch(err => console.error('Catalog error:', err));
+    }
 });
 
-// ===================== Telegram Auth =====================
+/* ===================== TELEGRAM AUTH ===================== */
 function onTelegramAuth(user) {
     localStorage.setItem('tg_user', JSON.stringify(user));
     showUser(user);
@@ -59,7 +71,7 @@ function showUser(user) {
     btn.querySelector('button').onclick = showProfile;
 }
 
-// ===================== PROFILE =====================
+/* ===================== PROFILE ===================== */
 function showProfile() {
     const user = JSON.parse(localStorage.getItem('tg_user'));
     if (!user) return showToast('Сначала авторизуйтесь');
@@ -86,7 +98,7 @@ function showProfile() {
     }
 }
 
-// ===================== CART =====================
+/* ===================== CART ===================== */
 function addToCart(product) {
     const user = JSON.parse(localStorage.getItem('tg_user'));
     if (!user) return showToast('Сначала авторизуйтесь');
@@ -106,7 +118,13 @@ function getCart() {
     return JSON.parse(localStorage.getItem('cart_' + user.id) || '[]');
 }
 
-// ===================== CATALOG =====================
+function clearCart() {
+    const user = JSON.parse(localStorage.getItem('tg_user'));
+    if (!user) return;
+    localStorage.removeItem('cart_' + user.id);
+}
+
+/* ===================== CATALOG ===================== */
 function renderCatalog(products) {
     const grid = document.querySelector('.catalog-grid');
     if (!grid) return;
@@ -122,17 +140,13 @@ function renderCatalog(products) {
             <div class="price">${p.price} zł</div>
             <button class="btn">Заказать</button>
         `;
+
         div.querySelector('button').onclick = () => addToCart(p);
         grid.appendChild(div);
     });
 }
 
-fetch('https://myair-zjra.onrender.com/catalog')
-    .then(r => r.json())
-    .then(renderCatalog)
-    .catch(err => console.error('Catalog error:', err));
-
-// ===================== TOAST =====================
+/* ===================== TOAST ===================== */
 function showToast(message, duration = 3000) {
     const t = document.createElement('div');
     t.className = 'toast';
