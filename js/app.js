@@ -21,6 +21,7 @@ import {
     saveDemoOrder
 } from "./cart.js";
 import { getAuthProvider, initAuth, isAdmin, logout, signInOrRegister } from "./auth.js";
+import { MYAIR_CONFIG } from "./config.js";
 
 const state = {
     products: loadProducts(),
@@ -34,6 +35,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     bindUi();
     setupAgeGate();
     setupNavigation();
+    setupExternalLinks();
     setupFilters();
     setupCart();
     setupAuth();
@@ -66,6 +68,12 @@ function bindUi() {
     });
 }
 
+function setupExternalLinks() {
+    document.querySelectorAll("[data-telegram-link]").forEach((link) => {
+        link.href = MYAIR_CONFIG.telegramUrl;
+    });
+}
+
 function setupAgeGate() {
     const confirmed = localStorage.getItem("myair.ageConfirmed") === "true";
     document.body.classList.toggle("age-locked", !confirmed);
@@ -94,7 +102,9 @@ function setupNavigation() {
             if (!target) return;
 
             event.preventDefault();
-            target.scrollIntoView({ behavior: "smooth", block: "start" });
+            const headerOffset = getHeaderOffset();
+            const top = Math.max(0, target.getBoundingClientRect().top + window.scrollY - headerOffset);
+            window.scrollTo({ top, behavior: "smooth" });
         });
     });
 
@@ -117,6 +127,11 @@ function setupNavigation() {
             closeAllModals();
         }
     });
+}
+
+function getHeaderOffset() {
+    const value = getComputedStyle(document.documentElement).getPropertyValue("--header-height");
+    return (Number.parseFloat(value) || 72) + 28;
 }
 
 function setupFilters() {

@@ -1,4 +1,5 @@
 import { formatPrice } from "./products.js";
+import { MYAIR_CONFIG } from "./config.js";
 
 const CART_KEY = "myair.cart";
 const ORDERS_KEY = "myair.orders";
@@ -12,10 +13,7 @@ export const VIP_LEVELS = [
 
 // Keep live payments blocked by default. Set legalComplianceConfirmed only after real legal review.
 export const PAYMENT_CONFIG = {
-    legalComplianceConfirmed: false,
-    stripePublishableKey: "pk_test_replace_me",
-    checkoutSessionEndpoint: "",
-    testPaymentLink: ""
+    ...MYAIR_CONFIG.stripe
 };
 
 export function getCart() {
@@ -123,20 +121,22 @@ export function saveDemoOrder(user, summary) {
 }
 
 export async function beginStripeCheckout(summary, user) {
-    if (!PAYMENT_CONFIG.legalComplianceConfirmed) {
+    const paymentConfig = getPaymentConfig();
+
+    if (!paymentConfig.legalComplianceConfirmed) {
         return {
             status: "blocked",
             message: `Stripe test checkout is prepared for ${formatPrice(summary.total)}, but real payment flow is intentionally blocked until legal compliance is confirmed.`
         };
     }
 
-    if (PAYMENT_CONFIG.testPaymentLink) {
-        window.open(PAYMENT_CONFIG.testPaymentLink, "_blank", "noopener,noreferrer");
+    if (paymentConfig.testPaymentLink) {
+        window.open(paymentConfig.testPaymentLink, "_blank", "noopener,noreferrer");
         return { status: "redirected", message: "Opened Stripe test payment link." };
     }
 
-    if (PAYMENT_CONFIG.checkoutSessionEndpoint && window.Stripe) {
-        const response = await fetch(PAYMENT_CONFIG.checkoutSessionEndpoint, {
+    if (paymentConfig.checkoutSessionEndpoint && paymentConfig.stripePublishableKey && window.Stripe) {
+        const response = await fetch(paymentConfig.checkoutSessionEndpoint, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -149,7 +149,7 @@ export async function beginStripeCheckout(summary, user) {
             })
         });
         const data = await response.json();
-        const stripe = window.Stripe(PAYMENT_CONFIG.stripePublishableKey);
+        const stripe = window.Stripe(paymentConfig.stripePublishableKey);
         await stripe.redirectToCheckout({ sessionId: data.sessionId });
         return { status: "redirected", message: "Redirecting to Stripe test checkout." };
     }
@@ -162,4 +162,11 @@ export async function beginStripeCheckout(summary, user) {
 
 function saveCart(cart) {
     localStorage.setItem(CART_KEY, JSON.stringify(cart));
+}
+
+function getPaymentConfig() {
+    return {
+        ...PAYMENT_CONFIG,
+        ...(window.MYAIR_STRIPE || {})
+    };
 }
