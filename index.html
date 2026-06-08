@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="MY AIR demo premium vape shop template with 18+ verification, cart, VIP, admin demo, Supabase-ready auth, and Stripe test checkout hook.">
+    <title>MY AIR | Premium Vape Shop Demo</title>
+    <link rel="icon" href="assets/product-sheet.png">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://js.stripe.com/v3/" defer></script>
+</head>
+<body>
+    <canvas id="smokeCanvas" aria-hidden="true"></canvas>
+
+    <div class="age-gate" id="ageGate" role="dialog" aria-modal="true" aria-labelledby="ageTitle">
+        <div class="age-card">
+            <span class="age-mark">18+</span>
+            <h2 id="ageTitle">Wejscie tylko dla doroslych</h2>
+            <p>
+                Ten szablon sklepu demo prezentuje produkty przeznaczone wylacznie dla osob pelnoletnich.
+            </p>
+            <p class="legal-copy">
+                Legal notice: products are only for adults. Real payments and sales must be connected only after local legal compliance, age checks, licensing, tax, shipping, and payment requirements are verified.
+            </p>
+            <div class="age-actions">
+                <button class="btn btn-primary" id="confirmAgeBtn" type="button">Mam 18+</button>
+                <button class="btn btn-ghost" id="leaveAgeBtn" type="button">Opusc strone</button>
+            </div>
+        </div>
+    </div>
+
+    <header class="site-header" id="siteHeader">
+        <a class="brand" href="#top" aria-label="MY AIR home">
+            <span class="brand-mark" aria-hidden="true">M</span>
+            <span>MY AIR</span>
+        </a>
+        <nav class="main-nav" aria-label="Glowna nawigacja">
+            <a href="#products">Produkty</a>
+            <a href="#contact">Kontakt</a>
+        </nav>
+        <div class="header-actions">
+            <button class="icon-btn" id="searchFocusBtn" type="button" aria-label="Szukaj produktow" title="Szukaj">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m1.35-5.15a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0Z"/></svg>
+            </button>
+            <button class="icon-btn cart-toggle" id="cartToggle" type="button" aria-label="Otworz koszyk" title="Koszyk">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.4 6h14l-1.7 8.5H8.1L6.4 3.5H3"/><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/></svg>
+                <span class="cart-count" id="cartCount">0</span>
+            </button>
+            <button class="btn btn-small btn-ghost" id="accountBtn" type="button">Konto</button>
+            <button class="btn btn-small btn-primary admin-nav" id="adminNavBtn" type="button" hidden>Admin</button>
+        </div>
+    </header>
+
+    <main id="top">
+        <section class="hero section">
+            <div class="hero-copy">
+                <h1>MY AIR</h1>
+                <p>Premium vape shop in cosmic style</p>
+                <div class="hero-actions">
+                    <a class="btn btn-primary" href="#products">Zobacz produkty</a>
+                    <button class="btn btn-ghost" id="openAccountHeroBtn" type="button">Profil VIP</button>
+                </div>
+                <p class="hero-legal">
+                    Demo 18+. Stripe only in test mode. Live payments require legal compliance first.
+                </p>
+            </div>
+            <div class="hero-media" aria-label="Premium MY AIR product render">
+                <img src="assets/hero-products.png" alt="Premium vape products in cosmic neon studio">
+                <div class="orbit orbit-one" aria-hidden="true"></div>
+                <div class="orbit orbit-two" aria-hidden="true"></div>
+            </div>
+        </section>
+
+        <section class="products section" id="products">
+            <div class="section-head">
+                <div>
+                    <h2>Produkty</h2>
+                    <p>Premium pods, liquidy i zestawy w ciemnym lounge stylu.</p>
+                </div>
+                <button class="btn btn-ghost" id="clearFiltersBtn" type="button">Reset filtrow</button>
+            </div>
+
+            <div class="product-toolbar glass">
+                <label class="search-field">
+                    <span>Szukaj</span>
+                    <input id="searchInput" type="search" placeholder="Szukaj produktow..." autocomplete="off">
+                </label>
+                <label>
+                    <span>Kategoria</span>
+                    <select id="categoryFilter">
+                        <option value="all">Wszystkie</option>
+                    </select>
+                </label>
+                <label>
+                    <span>Smak</span>
+                    <select id="flavorFilter">
+                        <option value="all">Wszystkie</option>
+                    </select>
+                </label>
+                <label>
+                    <span>Cena do <strong id="priceValue">500 zl</strong></span>
+                    <input id="priceFilter" type="range" min="40" max="500" step="10" value="500">
+                </label>
+            </div>
+
+            <div class="product-grid" id="productGrid" aria-live="polite"></div>
+        </section>
+
+        <section class="vip section" id="vip">
+            <div class="section-head">
+                <div>
+                    <h2>VIP Strefa</h2>
+                    <p>Poziom rosnie po zakupach demo i nalicza znizke w koszyku.</p>
+                </div>
+                <div class="vip-status glass" id="vipStatus">Bronze | 0%</div>
+            </div>
+            <div class="vip-grid">
+                <article class="vip-card glass" data-level="Bronze">
+                    <span>Bronze</span>
+                    <strong>0-199 zl</strong>
+                    <p>0% discount</p>
+                </article>
+                <article class="vip-card glass" data-level="Silver">
+                    <span>Silver</span>
+                    <strong>200-499 zl</strong>
+                    <p>5% discount</p>
+                </article>
+                <article class="vip-card glass" data-level="Gold">
+                    <span>Gold</span>
+                    <strong>500-999 zl</strong>
+                    <p>10% discount</p>
+                </article>
+                <article class="vip-card glass" data-level="Diamond">
+                    <span>Diamond</span>
+                    <strong>1000+ zl</strong>
+                    <p>15% discount</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="admin-panel section glass" id="adminPanel" hidden>
+            <div class="section-head">
+                <div>
+                    <h2>Panel administratora</h2>
+                    <p>Widoczny tylko dla kont admin demo. Produkcyjnie wymaga Supabase RLS lub backendu.</p>
+                </div>
+                <span class="admin-chip">Admin only</span>
+            </div>
+            <div class="admin-layout">
+                <form class="admin-form" id="productForm">
+                    <input type="hidden" id="productId">
+                    <label>
+                        <span>Nazwa produktu</span>
+                        <input id="productName" type="text" required placeholder="MY AIR Nebula Pod">
+                    </label>
+                    <label>
+                        <span>Kategoria</span>
+                        <input id="productCategory" type="text" required placeholder="Pody">
+                    </label>
+                    <label>
+                        <span>Smaki</span>
+                        <input id="productFlavors" type="text" required placeholder="Blue Razz, Mint, Mango">
+                    </label>
+                    <div class="form-row">
+                        <label>
+                            <span>Cena zl</span>
+                            <input id="productPrice" type="number" min="1" step="1" required>
+                        </label>
+                        <label>
+                            <span>Stock</span>
+                            <input id="productStock" type="number" min="0" step="1" required>
+                        </label>
+                    </div>
+                    <label>
+                        <span>Image URL</span>
+                        <input id="productImage" type="url" placeholder="https://...">
+                    </label>
+                    <div class="form-actions">
+                        <button class="btn btn-primary" type="submit">Zapisz produkt</button>
+                        <button class="btn btn-ghost" id="resetProductFormBtn" type="button">Wyczysc</button>
+                    </div>
+                </form>
+                <div class="admin-list" id="adminProductList" aria-live="polite"></div>
+                <div class="orders-panel">
+                    <h3>Zamowienia</h3>
+                    <div id="ordersList" class="orders-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="contact section" id="contact">
+            <div class="contact-card glass">
+                <div>
+                    <h2>Kontakt</h2>
+                    <p>Masz pytania? Napisz do MY AIR.</p>
+                </div>
+                <div class="contact-actions">
+                    <a class="contact-link" href="tel:+48123456789">
+                        <span>Telefon</span>
+                        +48 123 456 789
+                    </a>
+                    <a class="contact-link" href="mailto:kontakt@myair.pl">
+                        <span>E-mail</span>
+                        kontakt@myair.pl
+                    </a>
+                    <a class="contact-link" href="https://instagram.com/" target="_blank" rel="noreferrer">
+                        <span>Instagram</span>
+                        @myair
+                    </a>
+                    <a class="contact-link" href="https://t.me/" target="_blank" rel="noreferrer">
+                        <span>Telegram</span>
+                        MY AIR channel
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <aside class="cart-drawer" id="cartDrawer" aria-label="Koszyk" aria-hidden="true">
+        <div class="drawer-head">
+            <div>
+                <h2>Twoj koszyk</h2>
+                <p id="cartVipNote">VIP discount: 0%</p>
+            </div>
+            <button class="icon-btn" id="closeCartBtn" type="button" aria-label="Zamknij koszyk">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+            </button>
+        </div>
+        <div class="cart-items" id="cartItems"></div>
+        <div class="cart-summary">
+            <div><span>Suma</span><strong id="cartSubtotal">0 zl</strong></div>
+            <div><span>VIP discount</span><strong id="cartDiscount">0 zl</strong></div>
+            <div class="total-line"><span>Total</span><strong id="cartTotal">0 zl</strong></div>
+            <p class="legal-copy">
+                Stripe checkout is test mode only. Connect live payments only after legal compliance is confirmed.
+            </p>
+            <button class="btn btn-primary full" id="checkoutBtn" type="button">Checkout Stripe test</button>
+        </div>
+    </aside>
+
+    <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
+
+    <div class="modal" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authTitle" hidden>
+        <div class="modal-card glass">
+            <button class="icon-btn modal-close" data-close-modal="authModal" type="button" aria-label="Zamknij">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+            </button>
+            <h2 id="authTitle">Konto MY AIR</h2>
+            <p>Supabase-ready auth z lokalnym trybem demo, jesli klucze nie sa skonfigurowane.</p>
+            <div class="auth-tabs" role="tablist" aria-label="Auth mode">
+                <button class="active" data-auth-mode="login" type="button">Login</button>
+                <button data-auth-mode="register" type="button">Register</button>
+            </div>
+            <form id="authForm" class="auth-form">
+                <label>
+                    <span>Nazwa</span>
+                    <input id="authName" type="text" placeholder="Alex" autocomplete="name">
+                </label>
+                <label>
+                    <span>E-mail</span>
+                    <input id="authEmail" type="email" required placeholder="you@example.com" autocomplete="email">
+                </label>
+                <label>
+                    <span>Password</span>
+                    <input id="authPassword" type="password" required minlength="6" placeholder="Minimum 6 znakow" autocomplete="current-password">
+                </label>
+                <button class="btn btn-primary full" type="submit">Kontynuuj</button>
+            </form>
+            <p class="modal-note">Demo admin: zaloguj sie jako <strong>admin@myair.demo</strong>, aby zobaczyc panel.</p>
+        </div>
+    </div>
+
+    <div class="modal" id="profileModal" role="dialog" aria-modal="true" aria-labelledby="profileTitle" hidden>
+        <div class="modal-card glass">
+            <button class="icon-btn modal-close" data-close-modal="profileModal" type="button" aria-label="Zamknij">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+            </button>
+            <h2 id="profileTitle">Profil</h2>
+            <div class="profile-grid">
+                <div>
+                    <span class="meta-label">Uzytkownik</span>
+                    <strong id="profileName">Guest</strong>
+                </div>
+                <div>
+                    <span class="meta-label">VIP level</span>
+                    <strong id="profileVip">Bronze</strong>
+                </div>
+                <div>
+                    <span class="meta-label">Zakupy demo</span>
+                    <strong id="profileSpent">0 zl</strong>
+                </div>
+            </div>
+            <h3>Purchase history</h3>
+            <div class="history-list" id="purchaseHistory"></div>
+            <button class="btn btn-ghost full" id="logoutBtn" type="button">Logout</button>
+        </div>
+    </div>
+
+    <div class="modal" id="checkoutModal" role="dialog" aria-modal="true" aria-labelledby="checkoutTitle" hidden>
+        <div class="modal-card glass">
+            <button class="icon-btn modal-close" data-close-modal="checkoutModal" type="button" aria-label="Zamknij">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+            </button>
+            <h2 id="checkoutTitle">Stripe test checkout</h2>
+            <p id="checkoutMessage"></p>
+            <p class="legal-copy">
+                This is a demo template. Live payments must remain disabled until legal compliance is verified.
+            </p>
+            <button class="btn btn-primary full" id="saveDemoOrderBtn" type="button">Zapisz zamowienie demo</button>
+        </div>
+    </div>
+
+    <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
+
+    <footer class="site-footer">
+        <div class="brand">
+            <span class="brand-mark" aria-hidden="true">M</span>
+            <span>MY AIR</span>
+        </div>
+        <p>Copyright 2026 MY AIR. Demo store template.</p>
+        <p><strong>18+</strong> Products are only for adults. Nicotine products may be addictive. Real sales, shipping, taxes, age verification, and payments require legal compliance before launch.</p>
+    </footer>
+
+    <script type="module" src="js/smoke.js"></script>
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "myair-demo-store",
+  "version": "2.0.0",
+  "description": "MY AIR premium vape shop demo template with 18+ gate, Supabase-ready auth, admin demo, cart, VIP levels, and Stripe test checkout guard.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
